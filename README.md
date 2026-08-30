@@ -13,10 +13,29 @@ conversación. Las decisiones propias y su justificación están en `diario_deci
 |---|---|
 | Análisis exploratorio del extracto | completo — `modulo_a/exploration/eda_opus.ipynb` |
 | A-1 · Los cuatro transformadores | completo, con pruebas |
-| A-1 · `pipeline_demo.ipynb` | pendiente |
+| A-1 · `pipeline_demo.ipynb` | completo |
 | A-2 · Modelado, MLflow, SHAP y API | pendiente |
 | Módulo B · Lakehouse y MLOps | pendiente |
 | Módulo C · Arquitectura y RAG | pendiente |
+
+## Próximo paso: Ejercicio A-2
+
+El A-1 está cerrado. Lo que sigue es el modelado, y el EDA ya dejó medido lo que lo condiciona;
+conviene leer esto antes de escribir la primera línea:
+
+- **Regresión de `ley_au_gpT`.** La ley es el nivel del frente más ruido blanco: la media
+  histórica del frente predice la ley del turno siguiente con R² de 0.9752 y el turno anterior
+  con 0.9505. El baseline naive tiene que ser la media del frente, no el último valor, y ninguna
+  feature de historia aporta información más allá de ese nivel.
+- **Clasificación de falla a 4 horas.** El objetivo tal como lo define el enunciado no es
+  predecible en este extracto: ninguna condición observable mueve la tasa base de 3.05%. La
+  detección contemporánea sí funciona (22.7% de falla sobre 88 °C contra 3.3% de base). La
+  discusión de métrica tiene que partir de ahí.
+- **Validación temporal, no aleatoria**, y la codificación por objetivo se ajusta solo con datos
+  de entrenamiento.
+- **`prod_estimada_oz` no entra como feature**, y el enunciado exige un bloque de respuesta
+  explícito sobre por qué; sin él, el A-2 recibe cero puntos.
+- Faltan por crear `modulo_b/` y `modulo_c/`, que el enunciado lista en la estructura mínima.
 
 ## Ejecutar en un entorno limpio
 
@@ -89,7 +108,8 @@ repositorio-ds-mine/
 ├── requirements.txt
 ├── data/                         el extracto, ignorado por git
 ├── docs/
-│   └── diccionario_variables.md  diccionario transcrito y análisis conceptual
+│   ├── diccionario_variables.md  diccionario transcrito y análisis conceptual
+│   └── tabla_resultado.md        las 30 columnas de salida: unidades, lectura y advertencias
 └── modulo_a/
     ├── exploration/
     │   └── eda_opus.ipynb        análisis exploratorio, una sección por variable
@@ -115,6 +135,9 @@ repositorio-ds-mine/
   y 34 minutos— lo que es incompatible con diez perforadoras trabajando en paralelo. Se
   adopta el supuesto de que `equipo_id` y `op_id` son etiquetas repartidas sobre un flujo
   único y no admiten lectura causal. Está documentado en la sección 2 del notebook.
+- **La salida del pipeline está documentada columna por columna** en
+  [`docs/tabla_resultado.md`](docs/tabla_resultado.md): unidad, interpretación, rango observado
+  y las quince advertencias que hay que conocer antes de usar cualquiera de los 30 campos.
 - **`flag_imputed` marca lo que NO se pudo imputar.** Sigue la letra del enunciado: es `True`
   en las filas cuyo centinela de ley no se pudo reconstruir porque la ventana de siete días del
   mismo frente y tipo de mineral tenía menos de cinco lecturas, y esas filas quedan con la ley

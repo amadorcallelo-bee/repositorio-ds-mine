@@ -520,3 +520,23 @@ Corrige 4, 5, 6 y 8. Para el 12 crea el venv o usa el que ya está y prueba que 
 (Ejecutó: adición de `filas_imputadas_` y del método `objetivo_medido` al imputador, para que el codificador no aprenda de leyes reconstruidas sin necesidad de una columna nueva, con tres pruebas; corrección de la documentación de `ley_n_ventana`, que cuenta lecturas disponibles y no necesariamente medidas; nota en el README sobre qué marca `flag_imputed`; sección "Cómo validé el output de la herramienta" al comienzo de este archivo; actualización de la demo para que el codificador reciba el objetivo sin reconstruidas; desinstalación de plotly y kaleido del entorno virtual, que habían quedado sin uso, y verificación de que todo corre en el venv y de que el intérprete global no tiene ninguna de las dependencias; segunda revisión adversarial con doce comprobaciones sobre el extracto real.)
 
 Segunda revisión sin hallazgos nuevos: 59 pruebas, cobertura 100%, mypy y ruff limpios, los dos notebooks ejecutados sin errores y con el orden de ejecución consistente.
+
+### Amador
+
+haz el cambio. también quiero que crees otro doc donde documentes detenidamente la tabla de resultado con unidades e interpretaciones variable a variable para que sea muy claro en todo momento y no tengamos dudas. también allí deben estar notas y advertencias si existen
+
+### Claude
+
+(Ejecutó: reemplazo de `carga_termica_por_rpm` por `sobretemperatura_por_rpm`, medida sobre el incremento respecto de una temperatura de referencia configurable, con dos pruebas nuevas; reejecución del pipeline y de la demo; extracción del resumen real de las treinta columnas —tipo, nulos, únicos, mínimo, mediana y máximo— para documentar rangos medidos y no supuestos; redacción de `docs/tabla_resultado.md` con las treinta columnas y quince advertencias; actualización del README, el diario y esta transcripción.)
+
+62 pruebas, cobertura 100%, mypy y ruff limpios.
+
+### Amador
+
+Voy a cerrar la sesión porque ya tienes la ventana de contexto saturada, pero hemos terminado el ejercicio A-1, en la próxima sesión continuaremos con el ejercicio A-2. Deja todo listo a nivel de documentación para que pueda cerrar la sesión tranquilamente
+
+### Claude
+
+(Ejecutó: actualización del README con el estado de los módulos y una sección "Próximo paso: Ejercicio A-2" que resume las tres mediciones del EDA que condicionan el modelado; registro del estado del proyecto en la memoria persistente para la próxima sesión; integración de todo el trabajo pendiente a `main` con merge commit y publicación.)
+
+Ejercicio A-1 cerrado: 62 pruebas, cobertura 100%, mypy y ruff limpios, los dos notebooks ejecutados sin errores y la salida del pipeline documentada columna por columna.
