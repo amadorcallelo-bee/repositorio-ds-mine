@@ -1,0 +1,35 @@
+// Fuente del diagrama modulo_b/fabric_b2.png, en el DSL de Eraser (cloud architecture).
+title Fabric B-2 UMLC (diseno documentado, sin capacidad en la cuenta)
+direction right
+
+Databricks [label: "Databricks · Unity Catalog", icon: databricks] {
+  gold [label: "lakehouse_umlc.gold\naurum_kpi_turno (Delta)\n+ fallas_equipo_semana (especificada)", icon: table, color: gold]
+  jobs [label: "jobs B-1 y B-3\n(ya desplegados)", icon: settings]
+}
+
+Fabric [label: "Microsoft Fabric (capacidad F)", icon: azure] {
+  espejo [label: "Mirrored Databricks Catalog\nOneLake, cero copia", icon: refresh-cw]
+  lakehouse [label: "Lakehouse Fabric\ngold via espejo", icon: database]
+  semantico [label: "Modelo semantico Direct Lake\nley ponderada (SUMX), ranking (RANKX)\ntendencia semanal de fallas", icon: bar-chart]
+  rls [label: "Roles RLS\nJefe Veta-Sur: sector_geol = Veta-Sur\ngrupos de Entra ID", icon: lock]
+  pipeline [label: "Pipeline cada 30 min\nfrescura espejo, framing, chequeo", icon: clock]
+  activator [label: "Activator\ntasa de fallas ultimo turno > 5%", icon: alert-triangle]
+}
+
+Consumo [icon: users, color: gray] {
+  jefe [label: "Jefe Sector Veta-Sur\nsolo sus 4 frentes", icon: user]
+  gerencia [label: "Gerencia y planeamiento\nvista completa", icon: user-check]
+  alerta [label: "Alerta Teams / correo", icon: mail]
+}
+
+jobs > gold: escriben cada 30 min
+gold > espejo: sin copia fisica
+espejo > lakehouse
+lakehouse > semantico: Direct Lake
+rls > semantico: filtro por rol
+pipeline > espejo: verifica frescura
+pipeline > semantico: framing
+pipeline > activator: evalua KPI
+activator > alerta: si > 5%
+semantico > jefe: vista filtrada
+semantico > gerencia: vista completa

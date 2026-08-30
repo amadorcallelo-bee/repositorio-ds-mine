@@ -1926,3 +1926,21 @@ Resultados de la corrida real: la ley deriva en la última semana del extracto (
 ### Claude
 
 (Ejecutó: commit del B-3 en `feature/b3-mlops`; merge de `feature/b1-lakehouse` a `main` resolviendo los conflictos con el Módulo C —README con la tabla de estado y las secciones de los tres módulos, pyproject y gitignore en unión, diario e ia_usage conservando ambas secciones—; merge de `main` hacia `feature/b3-mlops`, que fusionó limpio, y de `feature/b3-mlops` a `main`; borrado de las dos ramas y worktree del B en detached sobre main; instalación de los requirements fusionados en la venv principal; verificación final sobre `main` integrado: ruff y mypy limpios en 91 archivos y 581 pruebas con 3 saltadas, cobertura 95.57%. `main` queda en `ef1dc86`, sin push a origin.)
+
+## 2026-08-30 — Módulo B, Ejercicio B-2
+
+### Amador
+
+No tengo capacidad de Fabric y no la tendré porque mi cuenta es nueva y ya lo intenté varias veces, pero entonces dejemos en un diagrama de eraser.io y en .md la estructura propuesta para el B-2 y con eso cerramos la prueba. Qué me sugieres? Yo tengo una propuesta y quiero que las comparemos para tomar la mejor decisión. Sé pragmático y no uses sobreingeniería
+
+### Claude
+
+Propuesta: `docs/fabric.md` más diagrama en `modulo_b/`, con la fila del README diciendo la limitación sin rodeos. Cuatro decisiones: réplica por Mirrored Databricks Catalog (coherente con la costura del C-1; shortcut S3 y copia programada descartados), modelo semántico Direct Lake con las medidas DAX escritas y el hallazgo de que gold no tiene la dimensión equipo (tabla `fallas_equipo_semana` a especificar), pipeline de 30 minutos que orquesta en vez de copiar con alerta por Activator, y RLS por grupos de Entra ID con protocolo de verificación con cifras esperadas reales. Tres preguntas: variante de réplica, tabla especificada o construida, y cifras reales o diseño sin números.
+
+### Amador
+
+1. Réplica. 2. solo en el doc. 3. del extracto real. | Procede | Mientras procedes y actualizas la documentación, si analizas ia_usage y diario_decisiones qué pensarías de mi trabajo como data scientist? | Con este envión debemos quedar con el proyecto cerrado, así que todo debe quedar push. No olvides hacer revisión adversorial
+
+### Claude
+
+(Ejecutó: rama `feature/b2-fabric`; cálculo de las cifras reales en Spark local con las clases del B-1 sobre el extracto, sin costo de nube —4 019 celdas, ley ponderada global 7.9623 g/t, Veta-Sur con 4 frentes y 1 176 celdas, ranking encabezado por FR-C2-02 con 311 341 oz, último turno N2 del 2025-10-28 con 1 falla en 8 eventos—; diagrama del B-2 escrito a mano en el DSL de Eraser, exportado a `modulo_b/fabric_b2.png` con su fuente `.eraser`; redacción de `docs/fabric.md`; actualización del README, del diario y de este archivo. Revisión adversarial incorporada al propio diseño: la alerta del 5 % sobre un turno de pocos eventos dispara por ruido —el último turno del extracto daría 12.5 % con una sola falla— y la regla diseñada evalúa el último turno cerrado con un mínimo de 20 eventos; el sesgo del denominador de la ley ponderada re-agregada queda declarado con su corrección de una línea.)
