@@ -366,3 +366,13 @@ pon en el notebook en la parte que acabas de agregar del supuesto adoptado que s
 ### Claude
 
 (Ejecutó: adición de un párrafo final "Advertencia, no bloqueo" al supuesto adoptado de la sección 2.)
+
+### Amador
+
+haz commit de todo esto en la rama de eda y muestrame en qué estado está el repo
+
+### Claude
+
+(Ejecutó: revisión del estado del repositorio, comprobación de que `feature/eda-modulo-a` ya no existe por haber sido integrada y borrada, creación de la rama `feature/eda-por-variable` y tres commits agregando los archivos por nombre.)
+
+Tres commits en `feature/eda-por-variable`: las reglas de trabajo, la reorganización del notebook y la documentación. `main` sigue en el merge anterior y no hay push.
