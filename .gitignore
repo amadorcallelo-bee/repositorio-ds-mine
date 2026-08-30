@@ -7,6 +7,10 @@ htmlcov/
 .ipynb_checkpoints/
 .env
 .DS_Store
+# Seguimiento de experimentos: la base de MLflow, sus artefactos y el store de archivos
+# heredado. Son salidas de una corrida, no codigo, y se regeneran ejecutando el notebook.
+mlflow.db
+mlartifacts/
 mlruns/
 
 # El extracto OPUS es dato de negocio, no codigo: vive en data/ y no entra a la historia

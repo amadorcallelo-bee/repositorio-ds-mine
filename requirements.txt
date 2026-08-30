@@ -1,11 +1,18 @@
 # Entorno del Modulo A. Python 3.12.
 #
-# Las dependencias de modelado (scikit-learn, lightgbm, xgboost, mlflow, shap, fastapi) se
-# agregan cuando se implemente el Ejercicio A-2.
+# Las versiones estan fijadas porque el evaluador tiene que reproducir el entorno, no
+# resolverlo: un rango abierto instala manana una version distinta de la que produjo los
+# notebooks versionados con sus salidas.
+#
+# En macOS, LightGBM necesita ademas la runtime de OpenMP, que no viaja en el wheel:
+#     brew install libomp
+# En Linux la provee el sistema (libgomp) y no hay paso adicional.
 
-# Analisis y datos
-pandas==3.0.5
-numpy==2.5.2
+# Analisis y datos.
+# pandas queda en la serie 2.x por MLflow 3.15, que declara `pandas<3`. Es la unica
+# restriccion dura del entorno y manda sobre la preferencia por la version mas nueva.
+pandas==2.3.3
+numpy==2.4.6
 
 # Figuras del EDA
 matplotlib==3.11.1
@@ -17,12 +24,29 @@ nbformat==5.11.1
 nbconvert==7.17.1
 ipykernel==7.3.0
 
-# Calidad: pruebas, cobertura, tipos y linter
+# Modelado del Ejercicio A-2
+scikit-learn==1.9.0
+lightgbm==4.7.0
+xgboost==3.4.1
+shap==0.52.0
+
+# Seguimiento de experimentos. El backend de archivos (`./mlruns`) quedo en modo
+# mantenimiento en MLflow 3.15 y lanza excepcion: el proyecto usa `sqlite:///mlflow.db`.
+mlflow==3.15.2
+
+# API de inferencia
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.5
+
+# Calidad: pruebas, cobertura, tipos y linter.
+# httpx2 lo pide `starlette.testclient`, que deprecio httpx para el cliente de pruebas.
 pytest==9.1.1
 pytest-cov==7.1.0
+httpx2==2.12.0
 mypy==2.3.1
 ruff==0.16.5
-pandas-stubs==3.0.5.260730
+pandas-stubs==2.3.2.250926
 
 # Modulo B: Spark y Delta Lake en local, para probar la logica del lakehouse sin Databricks.
 # Necesitan una JVM (brew install openjdk@21 en macOS; en Linux, el openjdk del sistema). La
