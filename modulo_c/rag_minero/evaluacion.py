@@ -335,7 +335,9 @@ class EvaluadorRagas:
 
         cliente = AsyncOpenAI(base_url=f"{host.rstrip('/')}/serving-endpoints", api_key=token)
         juez = llm_factory(modelo_juez, provider="openai", client=cliente)
-        embeddings: Any = embedding_factory(provider="openai", model=modelo_embeddings, client=cliente)
+        embeddings: Any = embedding_factory(
+            provider="openai", model=modelo_embeddings, client=cliente
+        )
         return cls(
             asistente,
             faithfulness=_MetricaRagas(Faithfulness(llm=juez)),

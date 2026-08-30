@@ -206,7 +206,9 @@ def test_el_evaluador_puntua_cada_caso_respondido_con_las_tres_metricas() -> Non
         assert "reference" in preciso.llamadas[0] and "retrieved_contexts" not in relevante.llamadas[0]
         assert not fiel.llamadas[0]["retrieved_contexts"][0].startswith("[PET-TEST-001#")
         resumen = EvaluadorRagas.resumen(resultados)
-        assert resumen == {"faithfulness": 0.9, "answer_relevancy": 0.8, "context_precision": 0.7, "respondidas": 3.0}
+        assert resumen == pytest.approx(
+            {"faithfulness": 0.9, "answer_relevancy": 0.8, "context_precision": 0.7, "respondidas": 3.0}
+        )
     finally:
         almacen.vaciar()
 
