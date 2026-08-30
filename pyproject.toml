@@ -94,6 +94,9 @@ ignore = [
 # Notebooks de Databricks en formato fuente: las celdas markdown viajan como comentarios
 # `# MAGIC` y no se parten.
 "modulo_b/0*_*.py" = ["E501"]
+# El notebook de MLOps abre con `%pip` y `restartPython()`, que deben ejecutarse antes que
+# cualquier import: el docstring y los imports quedan por obligacion despues de esas celdas.
+"modulo_b/04_mlops.py" = ["E501", "E402", "D100"]
 # `F` es la convencion universal de PySpark para `pyspark.sql.functions`.
 "modulo_b/**/*.py" = ["N812"]
 

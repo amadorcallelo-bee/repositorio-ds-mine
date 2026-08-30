@@ -11,10 +11,20 @@
 bundle:
   name: lakehouse_umlc
 
+# El job de MLOps importa `aurum_pipeline` (Modulo A): se sincroniza junto al bundle y el
+# arbol desplegado queda como el repositorio, `modulo_a/` y `modulo_b/` hermanos.
 sync:
+  paths:
+    - "."
+    - "../modulo_a/aurum_pipeline"
   exclude:
     - "**/__pycache__/**"
+    - "**/*.ipynb"
+    - "../modulo_a/aurum_pipeline/*.ipynb"
+    - "**/mlruns/**"
     - "umlc_lakehouse/tests/**"
+    - "../modulo_a/aurum_pipeline/tests/**"
+    - "../modulo_a/aurum_pipeline/serving/**"
 
 variables:
   catalogo:
@@ -63,6 +73,25 @@ resources:
             - task_key: silver_correcciones
           notebook_task:
             notebook_path: ./03_gold.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+
+    lakehouse_umlc_mlops:
+      name: lakehouse_umlc_mlops
+      description: >-
+        B-3 MLOps: monitor de deriva por PSI sobre ley y vibracion, trigger de
+        reentrenamiento y promocion staging->produccion con rollback registrado en MLflow.
+      max_concurrent_runs: 1
+      # La cadencia declarada es diaria y arranca pausada: encenderla es una decision de
+      # operacion, no un costo que la prueba tecnica deba correr sola.
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: America/Lima
+        pause_status: PAUSED
+      tasks:
+        - task_key: mlops
+          notebook_task:
+            notebook_path: ./04_mlops.py
             base_parameters:
               catalogo: ${var.catalogo}
 

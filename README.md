@@ -20,7 +20,7 @@ conversación. Las decisiones propias y su justificación están en `diario_deci
 | A-2 · Error de entrenamiento, brecha y diagnóstico de sobreajuste | completo, registrado en MLflow |
 | B-1 · Lakehouse medallion en Databricks | completo — `modulo_b/`, [`docs/lakehouse.md`](docs/lakehouse.md) |
 | B-2 · Fabric y orquestación | pendiente |
-| B-3 · MLOps y re-entrenamiento | pendiente |
+| B-3 · MLOps: deriva, re-entrenamiento y rollback | completo — `modulo_b/04_mlops.py`, [`docs/mlops.md`](docs/mlops.md) |
 | C-1 · Arquitectura de plataforma | completo — `modulo_c/decisiones_arquitectura.md` |
 | C-2 · RAG sobre documentación técnica | completo — `modulo_c/rag_minero/README.md`, demo ejecutada |
 
@@ -120,6 +120,23 @@ En una línea cada uno, con el detalle y las cifras en [`docs/lakehouse.md`](doc
   desde el Change Data Feed solo las 98 celdas afectadas de 4 019. Una segunda corrida del
   job no ingiere, no limpia y no recalcula nada.
 
+## Resultado del Ejercicio B-3
+
+En una línea cada uno, con el detalle en [`docs/mlops.md`](docs/mlops.md):
+
+- **La ley del extracto sí deriva en su última semana** (PSI 0.99 contra los 30 días
+  previos), y el desglose por sector muestra que es mezcla de frentes —Veta-Principal casi
+  apagada, 3 lecturas— y no el proceso de medición: la vibración está estable (PSI 0.04).
+- **El trigger disparó de verdad y el rollback lo contuvo**: el candidato reentrenado empató
+  con producción (0.2645 g/t) y el alias no se movió; el evento quedó en MLflow con la razón.
+- **El modelo es el del A-2, portado**: mismo pipeline LightGBM `MINIMO` con la codificación
+  del frente adentro, importado de `aurum_pipeline` en serverless, registrado en Unity
+  Catalog (`lakehouse_umlc.modelos`) con aliases `produccion` y `staging` y las métricas en
+  lenguaje de operación.
+- **Las dos ramas quedan demostradas de forma determinista** sobre un modelo `_demo` en
+  memoria: rollback (6.02 contra 3.04 g/t) y promoción (0.26 g/t), sin contaminar silver ni
+  gold.
+
 ## Ejecutar en un entorno limpio
 
 Requiere **Python 3.12** y el archivo `OP_AURUM_extract.csv`, que no se versiona.
@@ -218,6 +235,9 @@ databricks fs cp -r data/lotes/reclasificacion dbfs:/Volumes/$CATALOGO/bronze/la
 cd modulo_b
 databricks bundle deploy --var="catalogo=$CATALOGO"
 databricks bundle run lakehouse_umlc_b1 --var="catalogo=$CATALOGO"
+
+# 4. El job de MLOps del B-3 (monitor de deriva, trigger y rollback; instala LightGBM con %pip)
+databricks bundle run lakehouse_umlc_mlops --var="catalogo=$CATALOGO"
 ```
 
 `bundle run` imprime el resumen JSON con que termina cada notebook: filas por lote, versiones
@@ -299,7 +319,8 @@ repositorio-ds-mine/
 │   ├── diccionario_variables.md  diccionario transcrito y análisis conceptual
 │   ├── tabla_resultado.md        las 30 columnas de salida: unidades, lectura y advertencias
 │   ├── modelado.md               decisiones del A-2 y la medición que las sostiene
-│   └── lakehouse.md              decisiones del B-1 y las cifras de la corrida que las sostienen
+│   ├── lakehouse.md              decisiones del B-1 y las cifras de la corrida que las sostienen
+│   └── mlops.md                  decisiones del B-3: PSI, trigger, rollback y sus corridas
 ├── modulo_a/
     ├── exploration/
     │   └── eda_opus.ipynb        análisis exploratorio, una sección por variable
@@ -336,6 +357,7 @@ repositorio-ds-mine/
 │   ├── 01_bronze.py              Auto Loader con esquema explícito, metadata e ingesta_log
 │   ├── 02_silver.py              limpieza por diccionario, reporte DQ por lote y CDC del laboratorio
 │   ├── 03_gold.py                aurum_kpi_turno, Z-ORDER e incremental por Change Data Feed
+│   ├── 04_mlops.py               B-3: deriva por PSI, trigger, staging y rollback en MLflow
 │   ├── lakehouse_umlc.png        diagrama del lakehouse (fuente: lakehouse_umlc.eraser)
 │   └── umlc_lakehouse/           la lógica, probada en local sobre Spark
 │       ├── dominio.py            reglas del dominio y nombres del lakehouse
@@ -347,6 +369,9 @@ repositorio-ds-mine/
 │       ├── kpi.py                ConstructorKpiTurno: las fórmulas de gold
 │       ├── gold.py               ActualizadorGold: carga completa, Z-ORDER e incremental
 │       ├── cdc.py                AplicadorReclasificacion: el MERGE de las correcciones
+│       ├── deriva.py             CalculadorPsi y MonitorDeriva: las ventanas y el indice
+│       ├── modelo.py             EntrenadorLey: el pipeline del A-2 sobre eventos de silver
+│       ├── promocion.py          trigger, registro en MLflow y promocion con rollback
 │       ├── simulacion.py         lotes de llegada y de corrección desde el extracto
 │       └── tests/                pruebas sobre Spark local con datos sintéticos
 └── modulo_c/

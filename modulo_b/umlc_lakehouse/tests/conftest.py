@@ -17,6 +17,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pytest
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import DataFrame, SparkSession
@@ -158,3 +159,49 @@ def reloj_fijo(momento: datetime) -> Any:
 
 
 FECHA_ANALISIS = date(2025, 9, 28)
+
+
+def eventos_sinteticos(
+    dias: int = 21,
+    leyes: dict[str, float] | None = None,
+    ley_eval: dict[str, float] | None = None,
+    dias_evaluacion: int = 7,
+    inicio: str = "2025-09-01",
+) -> pd.DataFrame:
+    """Eventos a nivel del extracto para el B-3, con un evento por turno y frente.
+
+    Cada frente tiene una ley base; `ley_eval` permite desplazarla en los ultimos
+    `dias_evaluacion` dias, que es como se fabrica una degradacion o una deriva sin tocar
+    el generador. Las horas UTC 05, 11, 17 y 23 caen en los turnos N2, D1, D2 y N1 de Lima.
+    """
+    leyes = leyes if leyes is not None else {"FR-A-01": 5.0, "FR-B-02": 10.0}
+    ley_eval = ley_eval or {}
+    base = pd.Timestamp(inicio)
+    filas: list[dict[str, object]] = []
+    for dia in range(dias):
+        fecha = base + pd.Timedelta(days=dia)
+        en_evaluacion = dia >= dias - dias_evaluacion
+        for hora, turno in ((5, "N2"), (11, "D1"), (17, "D2"), (23, "N1")):
+            for frente, ley in leyes.items():
+                valor = ley_eval.get(frente, ley) if en_evaluacion else ley
+                filas.append({
+                    dominio.COLUMNA_TIEMPO: fecha + pd.Timedelta(hours=hora),
+                    dominio.COLUMNA_FRENTE: frente,
+                    dominio.COLUMNA_TURNO: turno,
+                    dominio.COLUMNA_LEY: valor,
+                    dominio.COLUMNA_TONELAJE: 100.0,
+                    dominio.COLUMNA_PRESION: 210.0,
+                    dominio.COLUMNA_RPM: 1100,
+                    dominio.COLUMNA_AVANCE: 1.75,
+                    dominio.COLUMNA_AGUA: 45.0,
+                    dominio.COLUMNA_VIBRACION: 5.0,
+                    dominio.COLUMNA_TEMPERATURA: 75.0,
+                    dominio.COLUMNA_OPERADOR: "OP-0001",
+                    dominio.COLUMNA_EQUIPO: "EQ-ATLAS-01",
+                    dominio.COLUMNA_FALLA: None,
+                    dominio.COLUMNA_PRODUCCION: 20.0,
+                    dominio.COLUMNA_TIPO_MINERAL: "SUL",
+                    dominio.COLUMNA_SECTOR: "Veta-Sur",
+                    dominio.COLUMNA_MANTENIMIENTO: 0,
+                })
+    return pd.DataFrame(filas)
