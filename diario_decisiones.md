@@ -356,3 +356,54 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   documento sean las que produce el modelo: si mañana cambia una tarifa y alguien no actualiza
   el texto, falla la prueba. Es la regla de hacer cumplir por máquina lo que no quiero dejar
   encomendado a la memoria.
+
+## 2026-08-30 — Módulo C, Ejercicio C-2
+
+- **Género y patrón de consulta no compiten: operan en niveles distintos.** Yo sostenía que el
+  género del documento tiene un papel importante en el chunking; Claude proponía decidir por
+  cómo pregunta el usuario. Elegí unir las dos posturas en dos niveles —el género elige la
+  estrategia porque decide qué elementos existen, y el tipo de elemento fija la unidad de
+  recuperación porque es lo que decide cómo se pregunta— y exigí que la discusión se cerrara
+  con una ablación medida y no con un argumento: tres variantes de chunking contra el golden
+  set, precisión y recall de contexto, sin modelo juez.
+
+- **Una estrategia fuerte para las tablas partidas por página.** Noté que muchas tablas de los
+  PDF están partidas por el salto de página y pedí que eso tuviera una solución robusta y no
+  un parche. Quedó como fusión por continuidad —la página anterior termina en tabla, la
+  siguiente empieza en tabla en el margen superior, mismo número de columnas— con una prueba
+  de integración que fija el inventario de filas de cada documento.
+
+- **BM25 para los códigos.** Ya lo había pensado antes de que Claude lo propusiera: en mina se
+  pregunta por código y los embeddings densos no los encuentran. Recuperación híbrida en los
+  dos almacenes, con la misma fusión de rangos recíprocos que usa Databricks.
+
+- **Databricks, no Azure, por practicidad.** Azure AI Search es más completo para agentes, pero
+  la plataforma del C-1 es Databricks y ahí es donde despega este asistente. Vector store:
+  Mosaic AI Vector Search de Databricks, con Chroma más BM25 como respaldo local para las
+  pruebas y para quien no tenga workspace. Claude señaló que el enunciado lista almacenes
+  reproducibles en local y que Vector Search exige workspace; acepté las dos implementaciones
+  detrás del mismo contrato.
+
+- **LangChain como orquestación** y **credencial única vía Databricks** (modelo, embeddings e
+  índice con el mismo perfil de la CLI), por practicidad. Sonnet 5 como generador y juez, con
+  las corridas de prueba a la mitad; luego Haiku genera y Sonnet juzga, para quitar el sesgo
+  de autoevaluación.
+
+- **Dos diagramas en Eraser, uno por situación:** el flujo de una pregunta y la relación entre
+  los roles de la mina, el asistente, los documentos y su clasificación. PDF por variable de
+  entorno, como el CSV. Golden set redactado por Claude y validado por mí caso por caso: en
+  pet-01 mi validación trajo la intervención de primer nivel del manual, y la respuesta
+  esperada quedó cruzando el PET con el manual.
+
+- **Costos antes de cada recurso, con tope de 40 USD.** Pedí evaluar el costo antes de
+  cualquier modificación. Aprobé una sesión estimada en 9.59 USD, dominada por el endpoint de
+  Vector Search por hora y no por los tokens, y bajé el auto-stop del warehouse a un minuto
+  para que la consulta de facturación costara 0.28 USD y no 1.54.
+
+- **Modelos abiertos cuando el workspace apagó a Claude.** El workspace de prueba devolvió
+  «rate limit of 0» para todos los modelos propietarios, incluso después de pasar a plan
+  pagado, porque la cuenta sigue en el nivel de confianza de prueba. Consideré esperar la
+  reclasificación o usar la API de Anthropic directa con clave propia, pero elegí correr con
+  Qwen3-Next 80B como generador y Llama 3.3 70B como juez —los dos probados— porque no
+  bloquea la entrega y el modelo es una variable de configuración; si Claude se habilita
+  antes de entregar, se repite solo la corrida final.

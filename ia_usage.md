@@ -586,3 +586,101 @@ Privados. Procede
 (Ejecutó: creación del worktree `../repositorio-ds-mine-c1` sobre rama nueva `feature/c1-arquitectura` desde `main`, sin tocar el checkout donde corre el A-2; creación de dos archivos privados en Eraser y de sus diagramas escritos a mano en DSL, porque la generación por IA de Eraser agotó su cuota; reajuste del diagrama de arquitectura tras revisar el render, que había quedado disperso; exportación de ambos a PNG dentro del repositorio; redacción de `modulo_c/costos.py` con solo biblioteca estándar y `Decimal`, de `modulo_c/tests/test_costos.py` que fija las cifras publicadas, y de `modulo_c/decisiones_arquitectura.md`; incorporación de `modulo_c` a la configuración de pytest, cobertura y mypy; corrección de tres filas de volumetría del documento que estaban mal etiquetadas.)
 
 95 pruebas, cobertura 99.81%, mypy estricto y ruff limpios. Ninguna cifra del documento se escribió a mano: todas salen de ejecutar `costos.py`, y la prueba falla si el documento y el modelo se desincronizan.
+
+## 2026-08-30 — Módulo C, Ejercicio C-2
+
+### Amador
+
+Continuemos con el C-2, así que léelo completo y compréndelo; nota que en el directorio de insumos están los tres archivos que indican en el .docx. Hazme una propuesta de cómo responder comenzando por la estructura de directorios y archivos (quiero que sea sencilla) y haz unas tablas comparativas entre os servicios para que la decisión para tomar una alternativa u otra sea objetiva. Debemos responder todo lo que preguntan en el C-2. Solo procede cuando explícitamente yo te lo indique
+
+### Claude
+
+(Ejecutó: lectura del enunciado y de los tres PDF; verificación del entorno —sin claves de API, sin Ollama, venv compartida sin librerías de RAG—; consulta de la API actual de RAGAS 0.4; cálculo del costo de una corrida de evaluación por proveedor.)
+
+Propuse la estructura de siete módulos, la lectura de cada documento —cómo está construido, cómo pregunta quien lo usa, cuál es la unidad de recuperación y qué rompe el troceo por tamaño fijo—, tres hallazgos transversales (en mina se pregunta por código, los documentos se referencian entre sí, el informe es CONFIDENCIAL) y tres tablas comparativas: vector store, proveedor de modelo y embeddings, y framework. Señalé que no había ninguna clave de API disponible y que RAGAS necesita un juez.
+
+### Amador
+
+1. Creo que el género del documento sí tiene un papel importante en la decisión del documento. Cómo sugieres que contrastemos ambas posturas? Podemos unirlas? 2. Muchas tablas en los docuentos están partidas por la separación de páginas, entonces debemos tener una estrategia fuerte ahí. 3. También había pensado en BM25 para los códigos, me alegra. 4. Me gusta la estructura, pero espera que definamos las otras cosas y la vuelves a proponer si es necesario un cambio; también quiero que le agregues un diagrama de flujo de usuario y otro de cómo se relacionan los usuarios que haremos en eraser.io a través del mcp. 5. Aunque Azure es más completo para agentes, la idea es despegar por practicidad este en Databricks; ajusta. 6. Usemos sonnet-5 y bajemos a la mitad las corridas de prueba. 7. Usemos langchain como framework de orquestación. | Usemos Mosaic AI Vector Search de databricks como vector store. Usemos mientras tnto .venv-rag . | Qué otras preguntas tienen?
+
+### Claude
+
+(Ejecutó: verificación de que la mayoría de las tablas de los tres PDF cruzan página; consulta de la disponibilidad de Vector Search en la edición gratuita de Databricks, de los modelos de embeddings multilingües y de los endpoints de Claude en Foundation Model APIs; cálculo del costo con Sonnet 5 y la mitad de corridas.)
+
+Propuse unir las dos posturas en dos niveles —el género elige la estrategia, el elemento fija la unidad— y cerrar la discusión con una ablación medida. Estrategia en tres capas para las tablas partidas. Señalé que Vector Search no corre en local y propuse dos implementaciones detrás de un contrato. Seis preguntas: workspace, credencial única, qué muestra el diagrama de usuarios, PDF en el repositorio o por variable, validación del golden set, y quién juzga.
+
+### Amador
+
+1. Sí tengo y el ID es "7474649439388207". 2. Por practicidad vamos con la opción de credencial única vía databricks. 3. Son dos diagramas, uno para cada situación. 4. Ruta por variable de entorno. 5. De acuerdo. 6. Haiku genera y sonnet juzga. | Para agilizar usemos Databricks CLI para que puedas manipular y configurar todo. Sé muy prudente con los costos y antes de hacer cualquier modificación o implementación evalúa los costos para saber que no nos vamos a pasar de los 40USD que nos dan de muestra gratuita
+
+### Claude
+
+(Ejecutó: instalación de la CLI de Databricks por Homebrew; consulta de tarifas oficiales de Vector Search y de Foundation Model APIs; modelo de costos de la sesión contra los 40 USD.)
+
+El endpoint de Vector Search es el riesgo: 0.28 USD por hora desde que existe un índice, olvidado una semana consume el presupuesto entero. Protocolo: todo contra Chroma primero, endpoint creado y borrado en la misma sesión, costo antes de cada recurso, tope de tokens en código. Pedí la URL del workspace para autenticar.
+
+### Amador
+
+(Corrió `databricks auth login` con el ID en vez de la URL, que se quedó colgado; luego con la URL correcta, y el perfil `amador-prueba` quedó guardado.)
+
+### Claude
+
+(Ejecutó: inventario del workspace en solo lectura: catálogos, endpoints de Vector Search, 27 endpoints de serving, warehouse y tablas de facturación visibles.)
+
+Dos hallazgos: no existe `databricks-claude-haiku-4-5` en el workspace, y verificar precios reales cuesta encender el warehouse; propuse bajar el auto-stop a un minuto. Pedí aprobar generador y juez, la consulta de precios y la creación del esquema.
+
+### Amador
+
+1. vamos con tu recomendación, esto es una prueba y lo importante es que seamos consciente de las limitaciones. 2. Hazlo. 3. Crealo
+
+### Claude
+
+(Ejecutó: auto-stop del warehouse a 1 minuto; creación del esquema `workspace.rag_minero`; consulta de `system.billing.list_prices` y `system.billing.usage`; verificación de que el warehouse se apagó; nota persistente con el perfil, los recursos y el protocolo de costos.)
+
+Serving confirmado a 0.07 USD por DBU en US West Oregon; la conversión token a DBU de Claude no está en la tabla de precios. Consumo acumulado del workspace: 0.0001 USD. Pregunté si integrar el C-1 a `main` antes de abrir el C-2.
+
+### Amador
+
+sigue mi regla. procede. haz revisión adversarial y atento con los costos
+
+### Claude
+
+(Ejecutó: revisión adversarial del C-1, que encontró siete cifras del documento calculadas fuera del modelo y una equivocada por redondeo —45,808 y no 45,816—, corregidas con pruebas y una verificación automática; integración del C-1 a `main` con merge commit, borrado de la rama y apertura de `feature/c2-rag`; creación de `.venv-rag` con las dependencias; redacción del golden set y las preguntas de control; lector de PDF, chunking, guardrails, almacén híbrido, asistente, evaluación y flujo, cada uno con sus pruebas; 149 pruebas, cobertura 94%, mypy estricto y ruff limpios; dos diagramas en Eraser, escritos a mano en DSL; corrida de los pasos gratuitos sobre los PDF reales.)
+
+Calibración 10/10 y 10/10; ablación con la propuesta por delante de las dos variantes de control. Presenté el golden set para validar y el costo de la sesión en Databricks: 9.59 USD estimados.
+
+### Amador
+
+2. apruebo ese costo. | Ahora las respuestas del golde-set, nota que las estoy copiando y pegando o resumiendo, pero es para que veas que sí deben estar correctas: [validación caso por caso de las diez respuestas]
+
+### Claude
+
+(Ejecutó: ajuste de pet-01 con la intervención del manual que trajo la validación; prueba de humo con embeddings, generación y juez de RAGAS.)
+
+Los embeddings funcionan; todos los modelos propietarios devuelven 403 «rate limit of 0». Probé los abiertos: Qwen3-Next 80B genera bien en español y Llama 3.3 70B funciona como juez; Qwen3.5 122B y gpt-oss devuelven bloques de razonamiento. Presenté costos con modelos abiertos y con la API de Anthropic.
+
+### Amador
+
+Acabo de pagar databricks premium, entonces reintenta
+
+### Claude
+
+(Ejecutó: reintento; consulta de la documentación y del foro de Databricks sobre el error.)
+
+Sigue bloqueado: es una restricción de nivel de cuenta (`TRIAL_VERIFIED`), no del plan; se corrige con la reclasificación de Databricks o un ticket a soporte.
+
+### Amador
+
+Vuelve a intentar
+
+### Claude
+
+(Ejecutó: reintento, mismo 403.)
+
+### Amador
+
+Corre con los modelos abiertos
+
+### Claude
+
+(Ejecutó: modelos configurables por variable de entorno; corrida de prueba local completa, que descubrió que el verificador leía el número de las citas de chunk como cifra sin respaldo y bloqueaba las diez respuestas; corrección con prueba de regresión; segunda corrida de prueba: faithfulness 1.00, answer relevancy 0.65, context precision 0.86, diez de diez respondidas, trece preguntas de control correctas; el cliente de Vector Search no lee el perfil OAuth de la CLI y recibió el token del SDK; creación del endpoint y del índice Delta Sync; generación del notebook de la demo; redacción del README del C-2 con marcadores para las cifras finales.)

@@ -347,7 +347,15 @@ class AlmacenDatabricks(AlmacenVectorial):
             from databricks.sdk import WorkspaceClient
 
             self.workspace = self.workspace or WorkspaceClient(profile=self.configuracion.perfil)
-            self.cliente_vs = self.cliente_vs or VectorSearchClient(disable_notice=True)
+            # El cliente de Vector Search no lee el perfil OAuth de la CLI: recibe el token
+            # que el SDK ya negocio, para no exigir un token personal aparte.
+            configuracion = self.workspace.config
+            token = configuracion.authenticate().get("Authorization", "").removeprefix("Bearer ")
+            self.cliente_vs = self.cliente_vs or VectorSearchClient(
+                workspace_url=configuracion.host,
+                personal_access_token=token.strip(),
+                disable_notice=True,
+            )
 
     @property
     def cantidad(self) -> int:
@@ -403,11 +411,17 @@ class AlmacenDatabricks(AlmacenVectorial):
         """Consulta hibrida del motor; el score devuelto es el de la fusion de Databricks."""
         from databricks_langchain import DatabricksVectorSearch
 
+        configuracion = self.workspace.config
+        token = configuracion.authenticate().get("Authorization", "").removeprefix("Bearer ")
         almacen = DatabricksVectorSearch(
             index_name=self.configuracion.indice_completo,
             endpoint=self.configuracion.endpoint,
-            text_column="texto",
             columns=[c for c in COLUMNAS_TABLA if c != "texto"],
+            client_args={
+                "workspace_url": configuracion.host,
+                "personal_access_token": token.strip(),
+                "disable_notice": True,
+            },
         )
         pares = almacen.similarity_search_with_score(
             consulta, k=k, filter=dict(filtros) if filtros else None, query_type="HYBRID"
