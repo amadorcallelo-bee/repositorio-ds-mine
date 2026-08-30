@@ -35,3 +35,39 @@ class MissingColumnsError(AurumError):
 
 class InvalidParameterError(AurumError):
     """Un parametro de construccion esta fuera de su rango admisible."""
+
+
+class EmptyPartitionError(AurumError):
+    """Una particion temporal quedo sin filas y el resultado no seria interpretable."""
+
+    def __init__(self, descripcion: str) -> None:
+        super().__init__(f"La particion quedo vacia: {descripcion}")
+
+
+class MisalignedIndexError(AurumError):
+    """El marco recibido no tiene el mismo numero de filas que el indice temporal guardado.
+
+    Es el fallo que se quiere hacer ruidoso: el particionador trabaja por posicion, porque es
+    la interfaz que espera scikit-learn, y una matriz reordenada o filtrada despues de
+    construirlo produciria pliegues silenciosamente equivocados.
+    """
+
+    def __init__(self, esperado: int, recibido: int) -> None:
+        super().__init__(
+            f"El indice temporal se construyo con {esperado} filas y se recibieron "
+            f"{recibido}: la matriz debe ser la misma, en el mismo orden."
+        )
+
+
+class SentinelNotImputedError(AurumError):
+    """La columna de ley todavia trae el valor especial de la sonda XRF.
+
+    Agregar por turno sin haber tratado el centinela arrastraria la media hacia abajo sin
+    dejar rastro, que es exactamente lo que el imputador existe para evitar.
+    """
+
+    def __init__(self, nombre_clase: str, columna: str, cuantos: int) -> None:
+        super().__init__(
+            f"{nombre_clase} recibio {cuantos} valores no positivos en {columna}: "
+            "ejecuta AurumImputer antes de construir la matriz por turno."
+        )

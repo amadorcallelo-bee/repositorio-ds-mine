@@ -290,6 +290,168 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   lo contrario de lo que sugiere su nombre, que `ton_rom_acum` no es un acumulado, que el umbral
   térmico real es 88 °C, que `equipo_id` y `op_id` no admiten lectura causal, y las demás.
 
+- **La respuesta obligatoria sobre `prod_estimada_oz` es una sola, no cuatro.** Claude me
+  presentó cuatro argumentos posibles: la circularidad algebraica —la variable es el objetivo
+  despejado y con `ton_rom_acum` y `tipo_mineral` en el mismo archivo la ley se reconstruye con
+  R² de 0.9999999998—, la fuga temporal, la fuga por el patrón de nulos y la procedencia
+  —el diccionario dice "calculada, no medida directamente"—. Consideré entregar las cuatro,
+  que es lo que suma en apariencia, pero elegí responder con la circularidad y la procedencia
+  como una sola tesis, porque en el fondo son la misma: la variable es una salida del propio
+  modelo interno de OPUS y por eso se despeja exactamente. Descarté la fuga temporal porque se
+  disuelve en cuanto alguien plantee que va a usar el modelo para simular escenarios y fije las
+  demás variables a mano, y descarté la del patrón de nulos porque es una observación menor que
+  no sostiene la respuesta por sí sola. Prefiero un argumento que resista la defensa técnica a
+  una lista que se caiga en la primera repregunta.
+
+- **La estructura del A-2 va dentro de `aurum_pipeline`, en dos paquetes nuevos.** Claude
+  propuso `modeling/` y `serving/` como hermanos de `transformers/`, y coincidía con lo que yo
+  había esbozado. Consideré un paquete separado por ejercicio, que dejaría el A-2 visualmente
+  aislado, pero elegí mantener un único paquete importable: el A-2 consume el A-1 por import y
+  no por copia, y la configuración de pytest, mypy y ruff no cambia. La separación entre
+  `modeling/` y `serving/` sí la conservo, porque es de dependencias y no de orden: entrenar no
+  debe requerir FastAPI y probar la predicción no debe requerir levantar un servidor.
+
+- **Los lags entran al modelo; el contrato de la API es otra cosa.** Claude había acotado las
+  features a lo que el payload de `/predict` puede transportar, apoyándose en que el objetivo
+  dice "dado el frente activo y condiciones actuales". Consideré aceptarlo, porque deja una API
+  sin estado y elegante, pero elegí separar los dos contratos: el enunciado no restringe las
+  features del modelo y los rezagos son causales; el A-1 los pidió explícitamente. La medición
+  me dio la razón —con lags el error baja de 0.4230 a 0.4140 g/t— aunque ninguno de los dos le
+  gane al baseline. La API los recibe como campos opcionales y degrada al nivel congelado del
+  frente cuando no llegan.
+
+- **La estrategia de ventana la deciden las cifras del modelo, no un tanteo previo.** Claude
+  midió expansiva contra deslizante en un experimento aparte y propuso la expansiva ya decidida.
+  Consideré aceptar la conclusión, que además coincidía con la mía, pero elegí que la comparación
+  fuera parte del entregable: el splitter soporta las dos estrategias como parámetro y las cinco
+  variantes se evalúan sobre los mismos pliegues y quedan registradas en MLflow. El enunciado
+  pide justificar la ventana temporal, y una justificación que el evaluador no puede reproducir
+  desde el repositorio no es justificación. De paso obligó a corregir un error: lo que Claude
+  había medido primero no era una ventana deslizante sino una historia decreciente anclada al
+  mismo corte.
+
+- **Tres conjuntos, no dos.** Pedí separar entrenamiento, validación y prueba en vez de trabajar
+  con desarrollo y hold-out. La prueba —el 20% más reciente del calendario, 797 turnos desde el
+  2025-05-06— se toca una sola vez y no participa de ninguna decisión; la validación es la que
+  elige hiperparámetros, conjunto de variables y estrategia de ventana. Descarté los tres bloques
+  fijos disjuntos que Claude ofrecía como alternativa, porque dejan una sola estimación de
+  validación sin dispersión medible e inutilizan el bloque intermedio para el ajuste final.
+
+- **Grilla aleatoria y no exhaustiva, con veinte configuraciones.** Elegí búsqueda aleatoria
+  sobre las distribuciones de hiperparámetros, anidada dentro de cada estrategia de ventana para
+  que cada una compita en su mejor configuración. Claude propuso `n_iter=30`, que medido daba 22
+  minutos de cómputo; lo bajé a 20 porque 13 minutos es un notebook que el evaluador puede correr
+  y 22 empieza a ser un notebook que nadie reejecuta.
+
+- **La API rechaza lo imposible y marca lo alarmante.** Claude advirtió que los rangos del
+  diccionario mezclan dos cosas: `pres_hidraul_bar` entre 180 y 240 es un rango operacional, pero
+  `vibracion > 12` y `temp > 95` son alertas, no imposibilidades físicas. Resolví que Pydantic
+  rechace con 422 únicamente lo que no puede existir y que acepte los valores de alerta
+  devolviéndolos marcados, porque un 422 ahí rechazaría exactamente los registros que a
+  operaciones le interesa consultar.
+
+- **El A-2 completo de una vez, no la regresión primero.** Había pedido cerrar la regresión y
+  después seguir con la clasificación, y lo cambié: con la estructura y las decisiones de
+  diseño ya tomadas, lo que faltaba era ver resultados, y partir el trabajo en dos entregas
+  habría significado revisar dos veces la misma partición, el mismo registro y la misma API.
+  Consideré el riesgo de que un lote grande escondiera un error; lo compensé pidiendo revisión
+  adversarial explícita sobre lo construido en lugar de confiar en que las pruebas verdes
+  bastaran.
+
+- **La firma del modelo es el contrato de la API, no una fila de la matriz.** La revisión de
+  extremo a extremo mostró que el servicio fallaba por esquema contra los modelos recién
+  registrados, y que las pruebas no lo veían porque registraban sin ejemplo. Consideré relajar
+  la validación de MLflow, que era el arreglo de una línea, pero elegí lo contrario: que la
+  firma sea exactamente la entrada del servicio y que un solo lugar del código defina qué
+  columnas y con qué tipos. La firma deja así de ser un adorno del registro y pasa a ser lo que
+  impide que el contrato de la API y el del modelo se separen en silencio.
+
+- **Falta registrar el error de entrenamiento, y lo dejo como pendiente explícito.** Al revisar
+  las corridas en MLflow noté que solo tenemos la métrica de validación: sin la de
+  entrenamiento no hay brecha que mirar, y sin brecha no se puede diagnosticar sobreajuste
+  desde el registro. Es una buena práctica que se nos quedó fuera. Vi además indicios de que el
+  clasificador de falla sobreajusta. Consideré parar y corregirlo antes de seguir, pero elegí
+  dejarlo anotado como pendiente y cerrar aquí: el cambio toca la evaluación, el registro y las
+  tablas comparativas de las dos fases, y prefiero abordarlo con la cabeza fresca antes que
+  meterlo al final de una sesión larga. Queda detallado en `docs/modelado.md`, con lo que hay
+  que implementar y las tres señales que me hicieron sospechar.
+
+## 2026-08-30 — Cierre del A-2: sobreajuste, feature engineering y la etiqueta de falla
+
+- **Pensar antes que entrenar.** El tiempo para iterar entrenamientos es limitado, así que en
+  vez de pedir más corridas pedí una propuesta para robustecer los modelos con revisión
+  adversarial incluida, y con énfasis en el feature engineering porque mi propia lista pudo
+  dejar cosas fuera. Consideré retomar directo el pendiente del error de entrenamiento, que
+  era lo único anotado, pero elegí que primero se releyeran el diccionario, la definición de
+  los modelos y el objetivo del A-2 contra los resultados ya medidos, porque un pendiente
+  puntual no garantiza que el resto del entregable resista la defensa.
+
+- **La etiqueta de falla mide continuidad operativa, y así hay que decirlo.** Claude midió
+  sobre el extracto que la tasa de `falla_en_4h` reproduce la de eventos independientes al
+  3.3% por evento en todos los tramos de actividad, que no hay agrupamiento ni precedencia, y
+  que el levante del clasificador coincide con lo que da una sola variable: cuánto llevaba el
+  frente sin registrar al cierre. Propuso reformular la lectura del resultado y el
+  experimento —etiqueta contada desde el cierre del bloque horario, columnas de actividad y de
+  resumen por umbral, un conjunto `ACTIVIDAD`, un baseline de actividad, la precisión media
+  condicionada a las ventanas con registros, el peso de clase medido en lugar de supuesto y los
+  campos nuevos opcionales en la API—. Consideré dejar la conclusión anterior, «hay señal pero
+  no alcanza para operar», que es cierta y ya estaba escrita, pero aprobé la reformulación
+  completa porque decir «hay señal» cuando la señal es «sigue perforando» es un error de
+  interpretación que un evaluador minero detectaría en la defensa, y porque la tesis se prueba
+  dentro del experimento y no en un párrafo.
+
+- **El pendiente del error de entrenamiento se implementa como estaba especificado**, con el
+  paso adicional que propuso Claude de pedirle el puntaje de entrenamiento a la propia
+  búsqueda de hiperparámetros, para que la curva entre capacidad y brecha salga de la corrida
+  que ya se hace y no de un experimento aparte.
+
+- **La ventana temporal de la regresión se valida antes de tocarla.** Claude propuso no
+  cambiar nada en la regresión. Consideré aceptarlo, porque el modelo empata con el techo del
+  problema, pero pedí que se validara primero si la ventana temporal es la adecuada, igual que
+  se cuestionó la ventana de la etiqueta en la clasificación: una decisión que no se revisó con
+  el mismo rigor que su vecina no está cerrada.
+
+- **Lo que queda fuera.** Acepté dejar fuera la regla 1-SE o la selección por media menos
+  desviación para mitigar la maldición del ganador, la capa de calibración, el modelo por
+  equipo, la búsqueda bayesiana y SMOTE, con el argumento de Claude que hice mío: con la brecha
+  registrada basta para diagnosticar, y cada una de esas piezas es una decisión más que
+  defender por una ganancia que el dato no sostiene.
+
+- **Revisión adversarial sobre lo construido, no solo sobre lo propuesto.** Lo recordé a mitad
+  del trabajo: la propuesta ya la había recibido con su revisión, pero la implementación tiene
+  que pasar por la misma prueba antes de darse por terminada.
+
+- **La ventana de entrenamiento, con hipótesis por defecto y reajuste que la honra.** La
+  validación que pedí mostró dos cosas: la ventana objetivo está bien planteada —el residuo sube
+  con el hueco solo porque los turnos que reabren una campaña son parciales—, y la fase B había
+  elegido una deslizante de doce meses por 0.0003 g/t con 0.016 de desviación entre pliegues,
+  mientras la fase C reajustaba el modelo con todo el desarrollo y la documentación defendía la
+  expansiva. Claude propuso dos salidas: conservar la expansiva salvo que una deslizante la
+  supere por más de la desviación entre pliegues y que el reajuste final honre la ventana
+  elegida, o dejar la selección como estaba, honrar la ventana y reescribir la documentación
+  como empate. Consideré la segunda, que no agrega reglas, pero elegí la primera porque deja en
+  producción un modelo entrenado con toda la historia por una decisión declarada y no por un
+  empate resuelto a favor del que tocó primero, y porque la regla no es sobre hiperparámetros
+  —esos siguen eligiéndose por el máximo, con la brecha al lado— sino sobre una hipótesis de
+  diseño que ya estaba escrita.
+
+- **El sensor se explica a tres horizontes, y la debilidad del protocolo se declara.** Pregunté
+  si nuestros resultados reflejaban que «el rango útil está en el sensor, no en el modelo»,
+  porque debía verse en el SHAP del clasificador. Claude midió que no se podía ver: el
+  clasificador registrado no lleva sensores, y el A-2 nunca había explicado al clasificador.
+  Propuso dos cosas —explicar el clasificador con todas las variables y una sonda a nivel de
+  evento que mide el mismo sensor contra la falla del mismo evento y contra la del siguiente, y
+  declarar que la fase A elige el conjunto con hiperparámetros por defecto y eso castiga a los
+  conjuntos anchos— y una tercera opcional, correr la fase B con `COMPLETO`. Elegí agregar las
+  dos primeras y dejar la tercera fuera, por la misma restricción de tiempo con que abrí la
+  sesión: la debilidad queda declarada con su número y la atribución dice lo mismo con
+  cualquiera de los dos modelos.
+
+- **El módulo A se cierra consolidando el repositorio desde esta sesión.** Trabajo en paralelo
+  en otras dos terminales sobre el mismo proyecto, cada una en su rama y su worktree. Pedí que
+  la consolidación se hiciera con cuidado: commits por nombre de archivo en la rama del A-2,
+  integración a `main` con merge commit y sin tocar los worktrees de las otras ramas.
+
 ## 2026-08-30 — Módulo C, Ejercicio C-1
 
 - **Abrir el Módulo C en paralelo al A-2, en un worktree aparte.** Estoy trabajando el A-2 en

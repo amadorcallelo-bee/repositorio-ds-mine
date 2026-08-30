@@ -33,9 +33,27 @@ warn_unreachable = true
 # ahi la anotacion explicita del codigo propio es la que manda.
 disallow_untyped_decorators = false
 
+# Librerias sin tipos publicados: se aceptan sin stubs y la anotacion del codigo propio
+# en la frontera con ellas es la que sostiene el modo estricto.
 [[tool.mypy.overrides]]
-module = ["pandas.*", "numpy.*"]
+module = [
+    "pandas.*",
+    "numpy.*",
+    "lightgbm.*",
+    "xgboost.*",
+    "shap.*",
+    "sklearn.*",
+    "mlflow.*",
+    "scipy.*",
+]
 ignore_missing_imports = true
+
+# scikit-learn no publica tipos, asi que sus clases base llegan como `Any` y el modo estricto
+# prohibe heredar de `Any`. La excepcion se acota a los dos modulos que implementan el
+# contrato de scikit-learn -transformadores y estimadores- y no se abre para todo el paquete.
+[[tool.mypy.overrides]]
+module = ["aurum_pipeline.modeling.features", "aurum_pipeline.modeling.baselines"]
+disallow_subclassing_any = false
 
 [tool.ruff]
 line-length = 100
