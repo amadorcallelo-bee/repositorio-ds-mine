@@ -605,3 +605,38 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   se puede verificar pagando corridas fallidas. Y las pruebas van dentro del paquete, como
   en el A-1, porque dos paquetes llamados `tests` en el `pythonpath` se pisan. Era justo lo
   que estaba pensando.
+
+## 2026-08-30 — Módulo B, Ejercicio B-3
+
+- **Las ventanas del PSI son las del monitoreo, no las del entrenamiento.** El enunciado dice
+  "los últimos 30 días como referencia" y es ambiguo. Claude me planteó las dos lecturas y
+  elegí la recomendada: la referencia son los 30 días anteriores a una ventana de evaluación
+  de 7, porque lo que se vigila es el proceso y no al modelo; anclar la referencia al momento
+  del entrenamiento respondería otra pregunta.
+
+- **Se porta el LightGBM del A-2, no un sustituto.** Claude recomendó registrar en Unity
+  Catalog un modelo de media por frente citando la conclusión del A-2, que es autocontenido y
+  más rápido. Elegí lo contrario: portar el modelo real, con `aurum_pipeline` sincronizado en
+  el bundle y LightGBM instalado en serverless, porque en la defensa quiero mostrar el mismo
+  pipeline del A-2 —codificación del frente adentro, conjunto `MINIMO`, métricas en lenguaje
+  de operación— viviendo el ciclo completo de MLOps, no una imitación.
+
+- **El registry va en un esquema nuevo `modelos`.** Justo como lo quería: los modelos no son
+  KPI y no se mezclan con `gold`.
+
+- **La demo de deriva es en memoria.** Elegí no ingerir lotes sintéticos de deriva por el
+  pipeline real: contaminar silver y gold para demostrar un mecanismo es más caro que
+  fabricar el escenario en memoria sobre un modelo `_demo`, y deja los KPI limpios para el
+  evaluador.
+
+- **B-1 se integra ya y el B-3 va en rama nueva.** Pedí commitear el B-1 e integrarlo a
+  `main` resolviendo los conflictos con el A-2 consolidado, y abrir `feature/b3-mlops` desde
+  ahí. La integración a `main` quedó en pausa porque la terminal del C-2 está en pleno merge
+  sobre el árbol principal; el B-3 avanza sobre la rama del B-1 verificada (395 pruebas,
+  99.56% de cobertura tras la fusión con el A-2).
+
+- **El MLOps es un job aparte, no una cola del job de datos.** Dudé entre las dos opciones y
+  pregunté qué se usa en Databricks; la referencia de la casa (MLOps Stacks) separa el
+  monitoreo y el reentrenamiento en jobs con su propio schedule, y así queda: job
+  `lakehouse_umlc_mlops` con cadencia diaria declarada y pausada, porque encenderla es una
+  decisión de operación y no un costo que la prueba deba correr sola.

@@ -1641,3 +1641,43 @@ estoy de acuerdo con ambas, es justo lo que estaba pensando. procede y haz revis
 ### Claude
 
 (Ejecutó: registro de las dos ratificaciones en el diario; revisión adversarial del B-1 completo con dos correcciones —la extensión `.CSV` en mayúsculas dejaba el `lote_id` vacío, y las correcciones se registraban en `ingesta_log` antes de aplicarse, de modo que un fallo a medias las daba por hechas; ahora se aplican primero— con su prueba; verificaciones completas y redespliegue del bundle.)
+
+## 2026-08-30 — Módulo B, Ejercicio B-3
+
+### Amador
+
+Pásame la propuesta de b-3, yo ya tengo una construida pero no te quiero sesgar para construir lo mejor posible.
+
+### Claude
+
+(Ejecutó: cálculo del rango de costos.)
+
+Propuesta del B-3: monitor de PSI con deciles de la referencia sobre `ley_au_gpT` (solo lecturas válidas) y `vibracion_rms_ms2`, referencia de 30 días y evaluación de 7, persistido en `dq_reports.monitor_deriva`; trigger por PSI > 0.2 global o error medio > baseline de MLflow x 1.15; modelo sustituto de media por frente citando al A-2; registry de Unity Catalog con aliases `produccion` y `staging`; rollback si staging es peor o igual, con evento registrado en MLflow con la razón; demo determinista en memoria; job aparte con schedule en pausa. Costo 0.09 a 0.35 USD. Revisión adversarial de cuatro puntos (mezcla de frentes contra deriva geológica, verdad con rezago, honestidad del sustituto, el reentrenamiento con datos derivados como caso que el rollback debe atrapar) y seis decisiones para Amador.
+
+### Amador
+
+Ya consolidó el A-2, revisalo para que lo comprendas. A tu propuesta hazle una revisión adversorial y hazme preguntas para que tomemos decisión según mi criterio y procedamos a implementar. Tenemos poco tiempo!
+
+### Claude
+
+(Ejecutó: revisión del A-2 consolidado en main —resultados, sección de sobreajuste, registro con cloudpickle, nombres de métricas— y de sus módulos `dataset`, `features`, `models` y `tracking`.)
+
+Revisión adversarial de la propia propuesta contra el A-2 real: usar el modelo del A-2 en la nube exige empaquetar `aurum_pipeline` e instalar LightGBM porque el registry del A-2 es SQLite local con cloudpickle; el sustituto de media por frente es el resultado del A-2, no un atajo; el baseline del trigger queda definido como `error_medio_g_por_tonelada` del run de producción; el bootstrap se especifica; y la rama del B-3 no debe nacer de un main sin el B-1. Seis preguntas.
+
+### Amador
+
+1. recomendado. 2. portar el lightgbm. 3. esquema nuevo para no mezclar, justo así lo quería. 4. demo de deriva es más sano. 5. sí, commitea B-1 e intégralo resolviendo los conflictos. 6. Aquí no estoy seguro, no sé en databricks qué es más usando en mlops
+
+### Amador
+
+Listo, haz revisión adversarial, que no se te olvide!
+
+### Claude
+
+(Ejecutó: respuesta a la 6 con la referencia de Databricks MLOps Stacks —jobs separados—; commit del B-1 en su rama; merge de main hacia la rama con resolución de los tres conflictos —README combinando A-2 y B-1, pyproject uniendo los overrides de mypy, requirements con los pins del A-2 más pyspark y delta—; reinstalación del venv con pandas 2.3.3 y el stack completo; verificación de la fusión con ruff, mypy y 395 pruebas al 99.56%; commit del merge. El intento de integrar a main fue rechazado por git: el árbol principal está en pleno merge de feature/c2-rag con conflictos de la otra terminal, y no se tocó. Un `| tail` enmascaró ese fallo y la rama feature/b3-mlops se creó desde la base equivocada; se detectó y se reapuntó a la punta verificada del B-1. Luego, implementación del B-3: `deriva.py`, `modelo.py` y `promocion.py` con sus pruebas —16, incluyendo el PSI reproducido a mano, los límites exactos del trigger y el rollback por peor o igual—, tres defectos corregidos en el camino —`valor_principal` es propiedad y no método, una referencia constante no definía bins, y una fecha mal calculada en un assert—, el notebook `04_mlops.py`, el job `lakehouse_umlc_mlops` con schedule diario en pausa, y el bundle sincronizando `aurum_pipeline` sin tests, serving ni notebooks; despliegue verificado y corrida del job lanzada.)
+
+### Claude
+
+(Ejecutó: corrida del job `lakehouse_umlc_mlops` en serverless, 11 min 33 s, y de la suite completa local: 411 pruebas, cobertura 99.54%. Escritura de `docs/mlops.md` y actualización del README.)
+
+Resultados de la corrida real: la ley deriva en la última semana del extracto (PSI global 0.9875, crítico) y el desglose por sector muestra que es mezcla de frentes —Veta-Principal con 3 lecturas contra 355 de referencia— mientras la vibración está estable (0.0355); el trigger disparó, el candidato reentrenado empató con producción (0.2645 g/t) y la regla de "peor o igual" produjo rollback con el evento en MLflow; bootstrap del modelo real del A-2 en `lakehouse_umlc.modelos.aurum_ley_turno_siguiente` versión 1; demo determinista con rollback (6.0234 contra 3.0354) y promoción (0.2645, versión 3); `dq_reports.monitor_deriva` con 8 filas.

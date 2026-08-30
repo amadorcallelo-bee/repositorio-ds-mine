@@ -180,3 +180,39 @@ COLUMNAS_ZORDER_GOLD: Final[tuple[str, str]] = (COLUMNA_FRENTE, COLUMNA_FECHA_LO
 CLAVE_TURNO: Final[tuple[str, str, str]] = (COLUMNA_FRENTE, COLUMNA_FECHA_LOCAL, COLUMNA_TURNO)
 #: Propiedad de la tabla gold donde queda la ultima version de silver incorporada.
 PROPIEDAD_VERSION_SILVER: Final[str] = "umlc.version_silver_procesada"
+
+# --- Ejercicio B-3: monitoreo de deriva, reentrenamiento y promocion de modelos ---
+
+#: Ventanas del monitor de deriva. El enunciado dice "los ultimos 30 dias como referencia";
+#: se lee como: la referencia son los 30 dias anteriores a la ventana que se evalua, y la
+#: ventana evaluada son los ultimos 7 dias con datos. La alternativa -anclar la referencia
+#: al momento del entrenamiento- vigilaria al modelo y no al proceso, y el enunciado pide
+#: vigilar las variables.
+VENTANA_REFERENCIA_DIAS: Final[int] = 30
+VENTANA_EVALUACION_DIAS: Final[int] = 7
+
+#: Variables criticas que vigila el monitor, como las nombra el enunciado.
+VARIABLES_DERIVA: Final[tuple[str, str]] = (COLUMNA_LEY, COLUMNA_VIBRACION)
+
+#: Deciles de la referencia como bins del PSI, y los umbrales de la convencion de industria
+#: que el propio enunciado usa: menos de 0.1 estable, 0.1 a 0.2 moderado, mas de 0.2 critico.
+BINS_PSI: Final[int] = 10
+PSI_MODERADO: Final[float] = 0.1
+PSI_CRITICO: Final[float] = 0.2
+
+#: Degradacion de la metrica que dispara el reentrenamiento: MAE actual > baseline * 1.15.
+DEGRADACION_MAE_MAXIMA: Final[float] = 0.15
+
+#: Nombres del registro de modelos y del experimento, en lenguaje de operacion como el A-2.
+ESQUEMA_MODELOS: Final[str] = "modelos"
+MODELO_LEY_REGISTRADO: Final[str] = "aurum_ley_turno_siguiente"
+ALIAS_PRODUCCION: Final[str] = "produccion"
+ALIAS_STAGING: Final[str] = "staging"
+EXPERIMENTO_MLOPS: Final[str] = "mlops_ley_turno_siguiente"
+TABLA_MONITOR_DERIVA: Final[str] = "monitor_deriva"
+
+#: Metricas con los mismos nombres que el A-2 dejo en MLflow, para que el registro de la
+#: nube y el local se lean igual.
+METRICA_ERROR: Final[str] = "error_medio_g_por_tonelada"
+METRICA_ERROR_ENTRENAMIENTO: Final[str] = "error_medio_g_por_tonelada_entrenamiento"
+METRICA_BRECHA: Final[str] = "brecha_entrenamiento_validacion"
