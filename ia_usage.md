@@ -1918,3 +1918,11 @@ Listo, haz revisión adversarial, que no se te olvide!
 (Ejecutó: corrida del job `lakehouse_umlc_mlops` en serverless, 11 min 33 s, y de la suite completa local: 411 pruebas, cobertura 99.54%. Escritura de `docs/mlops.md` y actualización del README.)
 
 Resultados de la corrida real: la ley deriva en la última semana del extracto (PSI global 0.9875, crítico) y el desglose por sector muestra que es mezcla de frentes —Veta-Principal con 3 lecturas contra 355 de referencia— mientras la vibración está estable (0.0355); el trigger disparó, el candidato reentrenado empató con producción (0.2645 g/t) y la regla de "peor o igual" produjo rollback con el evento en MLflow; bootstrap del modelo real del A-2 en `lakehouse_umlc.modelos.aurum_ley_turno_siguiente` versión 1; demo determinista con rollback (6.0234 contra 3.0354) y promoción (0.2645, versión 3); `dq_reports.monitor_deriva` con 8 filas.
+
+### Amador
+
+1. Commitea el b-3. 2. El módulo C está listo, entonces revisa, actualiza doc e integra
+
+### Claude
+
+(Ejecutó: commit del B-3 en `feature/b3-mlops`; merge de `feature/b1-lakehouse` a `main` resolviendo los conflictos con el Módulo C —README con la tabla de estado y las secciones de los tres módulos, pyproject y gitignore en unión, diario e ia_usage conservando ambas secciones—; merge de `main` hacia `feature/b3-mlops`, que fusionó limpio, y de `feature/b3-mlops` a `main`; borrado de las dos ramas y worktree del B en detached sobre main; instalación de los requirements fusionados en la venv principal; verificación final sobre `main` integrado: ruff y mypy limpios en 91 archivos y 581 pruebas con 3 saltadas, cobertura 95.57%. `main` queda en `ef1dc86`, sin push a origin.)
