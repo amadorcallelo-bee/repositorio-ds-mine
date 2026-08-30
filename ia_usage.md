@@ -1944,3 +1944,11 @@ Propuesta: `docs/fabric.md` más diagrama en `modulo_b/`, con la fila del README
 ### Claude
 
 (Ejecutó: rama `feature/b2-fabric`; cálculo de las cifras reales en Spark local con las clases del B-1 sobre el extracto, sin costo de nube —4 019 celdas, ley ponderada global 7.9623 g/t, Veta-Sur con 4 frentes y 1 176 celdas, ranking encabezado por FR-C2-02 con 311 341 oz, último turno N2 del 2025-10-28 con 1 falla en 8 eventos—; diagrama del B-2 escrito a mano en el DSL de Eraser, exportado a `modulo_b/fabric_b2.png` con su fuente `.eraser`; redacción de `docs/fabric.md`; actualización del README, del diario y de este archivo. Revisión adversarial incorporada al propio diseño: la alerta del 5 % sobre un turno de pocos eventos dispara por ruido —el último turno del extracto daría 12.5 % con una sola falla— y la regla diseñada evalúa el último turno cerrado con un mínimo de 20 eventos; el sesgo del denominador de la ley ponderada re-agregada queda declarado con su corrección de una línea.)
+
+### Amador
+
+Son claros los servicios que usaremos en el diagrama y en la documentación del B-2 y los flujos de información? Déjalos claros tal como lo hablamos, actualiza documentación y haz el push a main definitivo para que el repo quede en su estado ideal. Procede!
+
+### Claude
+
+(Ejecutó: revisión del diagrama y del documento del B-2 con dos vacíos encontrados —el informe de Power BI y Entra ID no aparecían como servicios, y tres flujos iban sin etiqueta—; actualización del diagrama con cada servicio nombrado por su producto —Workflows, Mirroring, OneLake, Lakehouse, Direct Lake, Data pipeline de Data Factory, Activator de Real-Time Intelligence, Informe Power BI, Entra ID— y todos los flujos etiquetados con qué fluye y a qué ritmo; nueva sección "Servicios y flujos, de un vistazo" en `docs/fabric.md` con la tabla de nueve pasos; regeneración del PNG y de la fuente `.eraser`; merge a main y push definitivo a origin.)

@@ -17,7 +17,24 @@ silver = LimpiadorSilver().separar(LimpiadorSilver().enriquecer(bronze)).validas
 gold = ConstructorKpiTurno().construir(silver)   # 4019 celdas, las mismas de la nube
 ```
 
-## 1. Réplica de Gold: espejo, no copia
+## 1. Servicios y flujos, de un vistazo
+
+Cada paso con su servicio concreto, qué fluye y a qué ritmo; es el mismo orden del
+diagrama `modulo_b/fabric_b2.png`:
+
+| # | De → a | Servicio concreto | Qué fluye | Cadencia |
+|---|---|---|---|---|
+| 1 | Jobs B-1/B-3 → `lakehouse_umlc.gold` | Databricks Workflows (serverless) | KPI por turno en Delta | cada 30 min |
+| 2 | Gold (Unity Catalog) → OneLake | **Mirroring**: Mirrored Azure Databricks Catalog | metadatos Delta; los datos no se copian | continua |
+| 3 | OneLake → Lakehouse de Fabric | shortcut interno del espejo | las tablas de gold, legibles como propias | — |
+| 4 | Lakehouse → modelo semántico | **Direct Lake** (Power BI) | columnas a memoria bajo demanda (framing) | tras cada escritura |
+| 5 | Entra ID → roles RLS | grupos de seguridad `sec-fabric-<sector>` | membresía de los cuatro roles | al cambiar el grupo |
+| 6 | Orquestación | **Data pipeline** (Data Factory en Fabric) | frescura del espejo, framing, chequeo del KPI | cada 30 min |
+| 7 | Modelo → alerta | **Activator** (Real-Time Intelligence) | regla: tasa de fallas del último turno cerrado > 5 % con ≥ 20 eventos | al evaluarse |
+| 8 | Activator → operaciones | Teams y correo | la alerta con el turno y la cifra | al disparar |
+| 9 | Modelo → consumidores | **Informe Power BI** | visuales; el jefe de Veta-Sur con RLS, la gerencia sin rol | — |
+
+## 2. Réplica de Gold: espejo, no copia
 
 **Mirrored Azure Databricks Catalog**: Fabric monta `lakehouse_umlc.gold` desde Unity
 Catalog en OneLake, sin mover datos y con los cambios visibles al ritmo en que los jobs del
@@ -33,7 +50,7 @@ Alternativas descartadas:
 - **Copia programada (pipeline copy)**: dos verdades que reconciliar, doble almacenamiento
   y un desfase que alguien tiene que vigilar. Es el anti-patrón que el C-1 ya rechazó.
 
-## 2. Modelo semántico en Direct Lake
+## 3. Modelo semántico en Direct Lake
 
 Sobre el espejo, un modelo en modo **Direct Lake** (ni import, que copia, ni DirectQuery,
 que traduce cada visual a SQL): lee el Delta de OneLake directamente y el framing lo deja
@@ -80,7 +97,7 @@ no se puede servir desde `aurum_kpi_turno`, cuyo grano es el frente (solo conser
 Muestra real (semana del 2025-10-20): EQ-BOAR-05 con 4 fallas, EQ-BOAR-06 y EQ-SAND-09 con
 2, EQ-ATLAS-04, EQ-SAND-08 y EQ-SAND-11 con 1; 1 659 fallas en los 18 meses del extracto.
 
-## 3. Pipeline cada 30 minutos: orquestar, no copiar
+## 4. Pipeline cada 30 minutos: orquestar, no copiar
 
 Con el espejo, la réplica no necesita pipeline. El pipeline de Fabric (cadencia 30 min,
 alineada con la llegada de lotes del B-1) queda en tres actividades:
@@ -99,7 +116,7 @@ eventos y 1 falla — 12.5 %, dispararía por una sola falla. La regla diseñada
 (nativo, sin código, escucha el KPI del modelo) hacia Teams y correo. La alternativa
 —actividad de pipeline con notificación— queda para capacidades sin Activator.
 
-## 4. Row-Level Security
+## 5. Row-Level Security
 
 - **Rol** `Jefe Sector Veta-Sur`, filtro DAX sobre el hecho: `[sector_geol] = "Veta-Sur"`
   (y el mismo filtro en `fallas_equipo_semana` vía la relación con los frentes del sector).
@@ -124,7 +141,7 @@ resultados conocidos de antemano; cuando exista capacidad, es una lista de chequ
 4. La prueba negativa: un usuario del grupo de Veta-Sur consultando por DAX directo
    (XMLA), no solo por el visual — el RLS aplica en el modelo, y esta consulta lo confirma.
 
-## 5. Costos y límites
+## 6. Costos y límites
 
 - La capacidad y su costo ya están dimensionados en el C-1: **F8** para 25–40 visores, con
   la tarifa verificada contra la API de precios de Azure (`modulo_c/costos.py`). Este

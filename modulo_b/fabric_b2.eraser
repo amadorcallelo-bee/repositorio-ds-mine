@@ -3,33 +3,38 @@ title Fabric B-2 UMLC (diseno documentado, sin capacidad en la cuenta)
 direction right
 
 Databricks [label: "Databricks · Unity Catalog", icon: databricks] {
-  gold [label: "lakehouse_umlc.gold\naurum_kpi_turno (Delta)\n+ fallas_equipo_semana (especificada)", icon: table, color: gold]
-  jobs [label: "jobs B-1 y B-3\n(ya desplegados)", icon: settings]
+  jobs [label: "Databricks Workflows (serverless)\njobs B-1 y B-3, ya desplegados", icon: settings]
+  gold [label: "lakehouse_umlc.gold (Delta)\naurum_kpi_turno\n+ fallas_equipo_semana (especificada)", icon: table, color: gold]
 }
 
-Fabric [label: "Microsoft Fabric (capacidad F)", icon: azure] {
-  espejo [label: "Mirrored Databricks Catalog\nOneLake, cero copia", icon: refresh-cw]
-  lakehouse [label: "Lakehouse Fabric\ngold via espejo", icon: database]
-  semantico [label: "Modelo semantico Direct Lake\nley ponderada (SUMX), ranking (RANKX)\ntendencia semanal de fallas", icon: bar-chart]
-  rls [label: "Roles RLS\nJefe Veta-Sur: sector_geol = Veta-Sur\ngrupos de Entra ID", icon: lock]
-  pipeline [label: "Pipeline cada 30 min\nfrescura espejo, framing, chequeo", icon: clock]
-  activator [label: "Activator\ntasa de fallas ultimo turno > 5%", icon: alert-triangle]
+EntraID [label: "Microsoft Entra ID\ngrupos sec-fabric-<sector>", icon: users, color: gray]
+
+Fabric [label: "Microsoft Fabric (capacidad F8, dimensionada en el C-1)", icon: azure] {
+  espejo [label: "Mirroring\nMirrored Azure Databricks Catalog\ncero copia hacia OneLake", icon: refresh-cw]
+  lakehouse [label: "Lakehouse (OneLake)\ngold visible via espejo", icon: database]
+  semantico [label: "Modelo semantico Direct Lake\nley ponderada (SUMX) · ranking (RANKX)\ntendencia semanal de fallas", icon: bar-chart]
+  rls [label: "Roles RLS del modelo\nJefe Veta-Sur: sector_geol = Veta-Sur", icon: lock]
+  informe [label: "Informe Power BI", icon: pie-chart]
+  pipeline [label: "Data pipeline (Data Factory)\ncada 30 min, 3 actividades", icon: clock]
+  activator [label: "Activator (Real-Time Intelligence)\nregla: tasa de fallas ultimo turno cerrado\n> 5% con minimo 20 eventos", icon: alert-triangle]
 }
 
 Consumo [icon: users, color: gray] {
-  jefe [label: "Jefe Sector Veta-Sur\nsolo sus 4 frentes", icon: user]
+  jefe [label: "Jefe Sector Veta-Sur\n4 frentes, 1176 de 4019 celdas", icon: user]
   gerencia [label: "Gerencia y planeamiento\nvista completa", icon: user-check]
-  alerta [label: "Alerta Teams / correo", icon: mail]
+  alerta [label: "Alerta a Teams y correo", icon: mail]
 }
 
-jobs > gold: escriben cada 30 min
-gold > espejo: sin copia fisica
-espejo > lakehouse
-lakehouse > semantico: Direct Lake
-rls > semantico: filtro por rol
-pipeline > espejo: verifica frescura
-pipeline > semantico: framing
-pipeline > activator: evalua KPI
-activator > alerta: si > 5%
-semantico > jefe: vista filtrada
-semantico > gerencia: vista completa
+jobs > gold: KPI por turno, cada 30 min
+gold > espejo: metadatos Delta, continuo
+espejo > lakehouse: tablas gold en OneLake
+lakehouse > semantico: Direct Lake, framing tras escribir
+EntraID > rls: membresia por grupo
+rls > semantico: filtro por sector segun rol
+pipeline > espejo: 1. verifica frescura
+pipeline > semantico: 2. framing
+pipeline > activator: 3. evalua el KPI
+activator > alerta: si supera el umbral
+semantico > informe: visuales
+informe > jefe: con RLS, solo Veta-Sur
+informe > gerencia: sin rol
