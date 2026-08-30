@@ -341,21 +341,32 @@ class AlmacenDatabricks(AlmacenVectorial):
     _cantidad: int = field(default=0, init=False)
 
     def __post_init__(self) -> None:
-        """Construye los clientes desde el perfil de la CLI si no se inyectaron."""
-        if self.workspace is None or self.cliente_vs is None:
-            from databricks.ai_search.client import VectorSearchClient
+        """Construye el cliente del workspace desde el perfil de la CLI si no se inyecto."""
+        if self.workspace is None:
             from databricks.sdk import WorkspaceClient
 
-            self.workspace = self.workspace or WorkspaceClient(profile=self.configuracion.perfil)
-            # El cliente de Vector Search no lee el perfil OAuth de la CLI: recibe el token
-            # que el SDK ya negocio, para no exigir un token personal aparte.
-            configuracion = self.workspace.config
-            token = configuracion.authenticate().get("Authorization", "").removeprefix("Bearer ")
-            self.cliente_vs = self.cliente_vs or VectorSearchClient(
-                workspace_url=configuracion.host,
-                personal_access_token=token.strip(),
-                disable_notice=True,
-            )
+            self.workspace = WorkspaceClient(profile=self.configuracion.perfil)
+
+    def _credenciales(self) -> tuple[str, str]:
+        configuracion = self.workspace.config
+        token = configuracion.authenticate().get("Authorization", "").removeprefix("Bearer ")
+        return str(configuracion.host), token.strip()
+
+    def _cliente(self) -> Any:
+        """El cliente inyectado o uno nuevo con token fresco.
+
+        El cliente de Vector Search no lee el perfil OAuth de la CLI y el token que el SDK
+        negocia caduca en una hora; construirlo en cada operacion evita que una espera larga
+        -crear el indice tarda casi media hora- termine con "Invalid Token".
+        """
+        if self.cliente_vs is not None:
+            return self.cliente_vs
+        from databricks.ai_search.client import VectorSearchClient
+
+        host, token = self._credenciales()
+        return VectorSearchClient(
+            workspace_url=host, personal_access_token=token, disable_notice=True
+        )
 
     @property
     def cantidad(self) -> int:
@@ -366,18 +377,18 @@ class AlmacenDatabricks(AlmacenVectorial):
 
     def endpoint_existe(self) -> bool:
         """Verdadero si el endpoint ya esta creado en el workspace."""
-        nombres = [e["name"] for e in self.cliente_vs.list_endpoints().get("endpoints", [])]
+        nombres = [e["name"] for e in self._cliente().list_endpoints().get("endpoints", [])]
         return self.configuracion.endpoint in nombres
 
     def crear_endpoint(self) -> None:
         """Crea el endpoint estandar y espera a que este listo. Cuesta 0.28 USD por hora."""
         if not self.endpoint_existe():
-            self.cliente_vs.create_endpoint_and_wait(self.configuracion.endpoint)
+            self._cliente().create_endpoint_and_wait(self.configuracion.endpoint)
 
     def borrar_endpoint(self) -> None:
         """Borra el endpoint; la facturacion se detiene 24 horas despues del ultimo indice."""
         if self.endpoint_existe():
-            self.cliente_vs.delete_endpoint(self.configuracion.endpoint)
+            self._cliente().delete_endpoint(self.configuracion.endpoint)
 
     # --- contrato ---
 
@@ -390,7 +401,7 @@ class AlmacenDatabricks(AlmacenVectorial):
         self._cantidad = len(chunks)
         indice = self._indice_o_none()
         if indice is None:
-            self.cliente_vs.create_delta_sync_index_and_wait(
+            self._cliente().create_delta_sync_index(
                 endpoint_name=self.configuracion.endpoint,
                 index_name=self.configuracion.indice_completo,
                 primary_key="chunk_id",
@@ -402,7 +413,7 @@ class AlmacenDatabricks(AlmacenVectorial):
             )
         else:
             indice.sync()
-            indice.wait_until_ready(wait_for_updates=True)
+        self._esperar_indice()
         return self._cantidad
 
     def buscar(
@@ -411,15 +422,14 @@ class AlmacenDatabricks(AlmacenVectorial):
         """Consulta hibrida del motor; el score devuelto es el de la fusion de Databricks."""
         from databricks_langchain import DatabricksVectorSearch
 
-        configuracion = self.workspace.config
-        token = configuracion.authenticate().get("Authorization", "").removeprefix("Bearer ")
+        host, token = self._credenciales()
         almacen = DatabricksVectorSearch(
             index_name=self.configuracion.indice_completo,
             endpoint=self.configuracion.endpoint,
             columns=[c for c in COLUMNAS_TABLA if c != "texto"],
             client_args={
-                "workspace_url": configuracion.host,
-                "personal_access_token": token.strip(),
+                "workspace_url": host,
+                "personal_access_token": token,
                 "disable_notice": True,
             },
         )
@@ -431,7 +441,7 @@ class AlmacenDatabricks(AlmacenVectorial):
     def vaciar(self) -> None:
         """Borra el indice y la tabla; el endpoint se conserva hasta `borrar_endpoint`."""
         if self._indice_o_none() is not None:
-            self.cliente_vs.delete_index(
+            self._cliente().delete_index(
                 endpoint_name=self.configuracion.endpoint,
                 index_name=self.configuracion.indice_completo,
             )
@@ -440,9 +450,23 @@ class AlmacenDatabricks(AlmacenVectorial):
 
     # --- ayudantes ---
 
+    def _esperar_indice(self, intervalo: float = 20.0, maximo: float = 3600.0) -> None:
+        """Espera a que el indice este listo consultandolo con un cliente fresco cada vez."""
+        inicio = time.monotonic()
+        while True:
+            indice = self._indice_o_none()
+            estado = indice.describe().get("status", {}) if indice is not None else {}
+            if estado.get("ready"):
+                return
+            if time.monotonic() - inicio > maximo:
+                raise TimeoutError(
+                    f"El indice no quedo listo en {maximo:.0f} s: {estado.get('detailed_state')}"
+                )
+            time.sleep(intervalo)
+
     def _indice_o_none(self) -> Any:
         try:
-            return self.cliente_vs.get_index(
+            return self._cliente().get_index(
                 endpoint_name=self.configuracion.endpoint,
                 index_name=self.configuracion.indice_completo,
             )

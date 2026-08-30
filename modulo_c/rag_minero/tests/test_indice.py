@@ -196,7 +196,7 @@ class _ClienteVsFalso:
             raise RuntimeError("no existe")
         return self.indices[index_name]
 
-    def create_delta_sync_index_and_wait(self, **kwargs: object) -> None:
+    def create_delta_sync_index(self, **kwargs: object) -> None:
         self.llamadas.append("crear_indice")
         self.indices[str(kwargs["index_name"])] = _IndiceFalso()
 
@@ -212,8 +212,8 @@ class _IndiceFalso:
     def sync(self) -> None:
         self.sincronizado = True
 
-    def wait_until_ready(self, wait_for_updates: bool = False) -> None:
-        return None
+    def describe(self) -> dict[str, dict[str, object]]:
+        return {"status": {"ready": True}}
 
 
 class _Estado:
@@ -316,3 +316,15 @@ def test_una_sentencia_fallida_se_reporta_con_su_estado(
     workspace.statement_execution.execute_statement = fallar  # type: ignore[method-assign]
     with pytest.raises(RuntimeError, match="FAILED"):
         almacen.indexar([])
+
+
+def test_la_espera_del_indice_falla_con_el_estado_si_nunca_queda_listo(
+    databricks: tuple[AlmacenDatabricks, _ClienteVsFalso, _WorkspaceFalso],
+) -> None:
+    almacen, cliente, _ = databricks
+    cliente.indices[almacen.configuracion.indice_completo] = _IndiceFalso()
+    cliente.indices[almacen.configuracion.indice_completo].describe = lambda: {  # type: ignore[method-assign]
+        "status": {"ready": False, "detailed_state": "PROVISIONING"}
+    }
+    with pytest.raises(TimeoutError, match="PROVISIONING"):
+        almacen._esperar_indice(intervalo=0.0, maximo=0.0)
