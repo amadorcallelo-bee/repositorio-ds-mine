@@ -615,3 +615,89 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   publicar `main` en GitHub, borrar la rama y el worktree del C-2 ya integrados, y corregir la
   última línea del README que todavía decía que `modulo_c/` faltaba por crear. El Módulo B
   sigue en sus ramas y su worktree, intacto.
+## 2026-08-30 — Módulo B, Ejercicio B-1
+
+- **El Módulo B en una tercera terminal, con límites explícitos.** Con el A-2 cerrándose en
+  una terminal y el C-2 en otra, abrí el B-1 en una tercera sesión. Consideré esperar a que
+  alguno terminara, pero elegí avanzar en paralelo y le fijé a la herramienta sus límites
+  antes de que escribiera nada: el árbol principal, su `.venv`, `pyproject.toml`,
+  `requirements.txt` y los archivos de trazabilidad son del A-2; `../repositorio-ds-mine-c1`
+  y `.venv-rag` son del C-2; el B-1 vive en un worktree propio con rama desde `main` y su
+  propio venv, y los conflictos de los archivos compartidos se resuelven en el PR. En
+  Databricks, no tocar `workspace.rag_minero` ni la configuración del warehouse.
+
+- **Diagrama en Eraser, en el directorio del módulo y con su fuente.** Pedí que el diagrama
+  del lakehouse fuera como el de la documentación de medallion de Databricks pero con nuestro
+  caso, y que viviera en `modulo_b/`. Claude lo escribió a mano en el DSL de Eraser porque la
+  generación por IA había agotado su cuota; acepté que la fuente `.eraser` se versione junto
+  al PNG, para que el diagrama se pueda regenerar y no sea una imagen huérfana.
+
+- **Sin tabla `bronze.lab_reclasificacion`.** Claude propuso guardar las correcciones del
+  laboratorio crudas en una tabla de bronze antes de aplicarlas a silver, por fidelidad al
+  origen. Consideré aceptarlo, pero elegí quitarla: el archivo del laboratorio queda en el
+  volumen de landing y `ingesta_log` lo registra, así que la tabla duplicaba el registro
+  crudo sin agregar nada. Menos objetos que explicar en la defensa.
+
+- **Silver particionada por `anio_mes`.** Pregunté de dónde salía, porque no lo recordaba del
+  enunciado, y Claude aclaró que el enunciado solo pide "partición justificada" y que
+  `anio_mes` era su recomendación. Consideré las otras dos que planteó —sin partición con
+  liquid clustering, que es lo que Databricks recomienda por debajo de 1 TB, y
+  `sector_geol`, que se alinea con el RLS del B-2— pero elegí `anio_mes` porque los
+  patrones de consulta reales son por rango de fecha: el `MERGE` de las correcciones poda a
+  los meses tocados, el monitor de drift del B-3 lee 30 días y gold se recalcula por celdas
+  de fecha. Acepto que a 10 MB ninguna partición cumple el mínimo de 1 GB que publica
+  Databricks, y que la justificación es de poda de escritura, no de rendimiento de lectura.
+
+- **Eficiencia de avance contra el 3.5 m/min del manual, no contra un percentil.** Claude
+  había propuesto el percentil 95 histórico del frente; pregunté qué era y pedí que releyera
+  los PDF. El manual del equipo no trae avance nominal pero sí el rango normal del sensor
+  LVDT, 0.3 a 3.5 m/min. Elegí `avg(avance_mmin) / 3.5`: tiene fuente documental y un
+  operador de mina lo lee como fracción del avance máximo especificado. Descarté el p95 por
+  no tener fuente externa y el promedio a secas por no ser una eficiencia.
+
+- **Horas efectivas, producción recalculada, reporte DQ como tabla y Auto Loader.** Acepté las
+  cuatro recomendaciones: horas efectivas como el lapso entre primer y último evento del
+  turno, acotado a seis horas, menos el tiempo de los eventos con falla o en mantenimiento;
+  `prod_oz_recalculada` en gold con la fórmula de OPUS y el tipo vigente, conservando
+  `prod_estimada_oz` intacta; el reporte de calidad como tabla Delta y no como archivos, para
+  que Fabric lo consuma en el B-2; y Auto Loader para la ingesta, después de preguntar qué
+  era y entender que el checkpoint es lo que hace idempotente la llegada de archivos.
+
+- **JDK por Homebrew.** Pregunté si el JDK era necesario y qué alternativas había. Lo es:
+  Spark corre en una JVM y `pyspark` es solo el cliente. Consideré el JDK dentro del venv con
+  `install-jdk`, que no toca el sistema, y Databricks Connect, que ejecuta las pruebas en
+  serverless con costo por sesión. Elegí `brew install openjdk@21` porque es lo que el README
+  le va a decir al evaluador, y porque Java no lo usan las otras dos sesiones.
+
+- **Precios confirmados antes de gastar.** Mantengo la regla de estimar el costo antes de
+  cualquier acción en nube. Pedí confirmar los precios de lista en lugar de fiarme de la
+  memoria: `system.billing.list_prices` dio 0.35 USD/DBU para jobs serverless, 0.75 para
+  notebooks y 0.70 para SQL, exactamente los supuestos, y la consulta costó el mínimo de un
+  minuto del warehouse. El rango del B-1 quedó en 1.6 a 7.9 USD de los 40 del trial.
+
+- **Revisión adversarial y verificación contra el enunciado, siempre.** Al aprobar la
+  implementación reiteré las dos condiciones: que la herramienta revise en contra de lo que
+  construye y que compruebe, punto por punto, que respondemos lo que el enunciado pregunta y
+  no lo que nos resultó cómodo construir.
+
+- **El catálogo `lakehouse_umlc` lo creé yo desde la interfaz.** La CLI y la API del trial
+  rechazan crear catálogos con Default Storage, y Claude corrió la validación sobre el catálogo
+  `workspace` para no bloquearse. Consideré dejarlo ahí, documentado como limitación, pero
+  elegí crear `lakehouse_umlc` a mano, de tipo Normal, porque el árbol del enunciado empieza
+  por ese nombre y un evaluador que lo busque debe encontrarlo. Es el único paso del B-1 que
+  no fue por línea de comandos; el redespliegue fue un parámetro y los esquemas de prueba de
+  `workspace` se borraron.
+
+- **Sin commit todavía.** Prefiero consolidar primero el A-2 en su terminal y commitear el B-1
+  después, para resolver los conflictos de README, `pyproject.toml`, `requirements.txt` y los
+  archivos de trazabilidad una sola vez y con la cabeza puesta en ello.
+
+- **Ratifico el diseño sin `foreachBatch` y las pruebas dentro del paquete.** Claude tomó
+  ambas decisiones durante la implementación y me las expuso dos veces. Consideré pedir que
+  se conservara `foreachBatch`, que es el patrón canónico de Auto Loader, pero elegí el
+  diseño en batch porque en serverless la función corre en el servidor bajo Spark Connect y
+  el estado del cliente no llega a ella: prefiero un libro de control explícito
+  (`reporte_calidad` para silver, `ingesta_log` para las correcciones) a un patrón que solo
+  se puede verificar pagando corridas fallidas. Y las pruebas van dentro del paquete, como
+  en el A-1, porque dos paquetes llamados `tests` en el `pythonpath` se pisan. Era justo lo
+  que estaba pensando.
