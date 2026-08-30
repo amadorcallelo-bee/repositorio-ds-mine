@@ -1,14 +1,15 @@
 {
-  "descripcion": "Golden set del asistente RAG: diez preguntas con la respuesta esperada y los pasajes del documento que la sostienen. Tres por documento y una cruzada. Los pasajes de referencia son citas literales del PDF, independientes de la estrategia de chunking, para que sirvan en la ablacion.",
+  "descripcion": "Golden set del asistente RAG: diez preguntas con la respuesta esperada y los pasajes del documento que la sostienen. Tres por documento y una cruzada. Los pasajes de referencia son citas literales del PDF, independientes de la estrategia de chunking, para que sirvan en la ablacion. Respuestas esperadas validadas por Amador Calle el 2026-08-30.",
   "casos": [
     {
       "id": "pet-01",
-      "documento": "PET-PERF-007",
-      "tipo_pregunta": "condicion-accion",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "tipo_pregunta": "condicion-accion-cruzada",
       "pregunta": "¿Qué debe hacer el operador si durante la perforación la presión hidráulica cae por debajo de 140 bar?",
-      "respuesta_esperada": "Detener el equipo de inmediato y reportar el código H-HIDRA-02 al Supervisor de Turno. No debe reiniciar sin autorización. Es el criterio de parada inmediata CP-03 del PET-PERF-007.",
+      "respuesta_esperada": "Detener el equipo de inmediato y reportar el código H-HIDRA-02 al Supervisor de Turno; no reiniciar sin autorización (criterio de parada inmediata CP-03 del PET-PERF-007). La intervención de primer nivel para H-HIDRA-02 según el manual del L8 es inspeccionar mangueras y racores y revisar el nivel de aceite; si el nivel está bien y la presión no recupera, requiere especialista.",
       "contextos_referencia": [
-        "CP-03 Pérdida de presión hidráulica <140 bar durante operación Detener. Reportar H-HIDRA-02. No reiniciar sin autorización."
+        "CP-03 Pérdida de presión hidráulica <140 bar durante operación Detener. Reportar H-HIDRA-02. No reiniciar sin autorización.",
+        "H-HIDRA-02 Presión cae a <140 bar durante perforación Fuga en manguera de alta presión o falla en bomba Detener. Inspeccionar mangueras y racores. Revisar nivel de aceite. Sí, si nivel OK y presión no recupera"
       ]
     },
     {
