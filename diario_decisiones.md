@@ -289,3 +289,70 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   estaban dispersas entre el notebook, el diccionario y los docstrings: que `flag_imputed` marca
   lo contrario de lo que sugiere su nombre, que `ton_rom_acum` no es un acumulado, que el umbral
   térmico real es 88 °C, que `equipo_id` y `op_id` no admiten lectura causal, y las demás.
+
+## 2026-08-30 — Módulo C, Ejercicio C-1
+
+- **Abrir el Módulo C en paralelo al A-2, en un worktree aparte.** Estoy trabajando el A-2 en
+  otra terminal, con el notebook escribiéndose en sitio y MLflow abierto sobre `mlflow.db`.
+  Consideré simplemente crear la rama en el mismo directorio, pero eso obligaba a un
+  `git checkout` que le cambia el árbol de trabajo al notebook en ejecución, así que elegí un
+  worktree separado sobre rama nueva desde `main`. Le di además tres restricciones explícitas
+  a la herramienta: no instalar ni desinstalar nada en la venv compartida, no escribir en
+  `mlflow.db`, y no cambiar de rama en el directorio principal.
+
+- **Plataforma: híbrido Databricks más Fabric.** Claude planteó tres opciones con una tabla
+  comparativa y recomendó el híbrido. Consideré seriamente Fabric puro, que para un equipo de
+  4 personas es el más barato de operar y no es un argumento menor, pero elegí el híbrido
+  porque el Módulo B ya pide medallion en Databricks, capa Gold en Fabric con RLS y MLflow:
+  responder Fabric puro en el C-1 dejaría al Módulo B incoherente conmigo mismo, y eso se cae
+  en la defensa de 30 minutos. Acepté que el documento declare el umbral en que la decisión se
+  revierte: si el equipo baja de 4 personas o desaparece el ciclo de ML, la respuesta correcta
+  pasa a ser Fabric puro.
+
+- **Estructura literal del enunciado, no la mía.** Yo había pedido `arquitectura_plataforma_umlc/`
+  y `rag/` como subdirectorios, con solo un `.md` adentro. Claude me señaló que el enunciado
+  lista como estructura mínima `modulo_c/arquitectura.(png|pdf)`, `decisiones_arquitectura.md`
+  y `rag_minero/`, y que un evaluador que revise estructura contra esa lista lo marca sin leer
+  el contenido. Consideré conservar mi organización, pero elegí la estructura literal: la
+  claridad interna no vale un punto perdido por forma.
+
+- **Verificar la normativa peruana antes de nombrarla.** Consideré describir el requisito
+  regulatorio de forma genérica, que es más rápido y no arriesga un error factual, pero elegí
+  que se verificara: nombrar mal una norma peruana en la defensa técnica cuesta más que no
+  nombrarla. De ahí salieron ESTAMIN, la Declaración Anual Consolidada del artículo 50 del TUO
+  de la Ley General de Minería, y el reporte geotécnico semestral de relaves ante OSINERGMIN,
+  con sus plazos y multas.
+
+- **Dos diagramas, en archivos de Eraser separados y privados.** Claude propuso uno solo o
+  hasta tres, y agrupar ambos en un mismo archivo. Elegí dos —la arquitectura completa y el
+  camino del dato bajo conectividad intermitente— porque el segundo es el que demuestra
+  dominio minero, y pedí que fueran archivos distintos y privados, no un solo archivo
+  compartido.
+
+- **Tarifas de East US con la variación declarada.** Consideré cotizar en Brazil South, que es
+  la región que la UMLC usaría de verdad, pero elegí East US porque es la lista base y
+  cualquiera la verifica en un minuto contra la API oficial de precios de Azure; el documento
+  declara que una región sudamericana encarece y que ese sobrecosto no está incorporado.
+
+- **Escenario de consumo F8 con 25 a 40 visores.** Es el tamaño coherente con jefaturas de
+  sector, planeamiento, geología y gerencia sobre 3 minas, 1 planta y 2 relaveras. Descarté
+  F16 con 80 visores por inflar el total y F4 con 15 por quedarse corto frente al escenario
+  del enunciado.
+
+- **Nombrar productos concretos en el borde.** Consideré dejar el patrón sin marca, que
+  envejece mejor como documento de arquitectura, pero elegí nombrar Azure IoT Edge y Event
+  Hubs porque en una defensa técnica lo concreto se puede sustentar con precios y límites
+  reales y el patrón abstracto no.
+
+- **El costo de tokens del asistente se resuelve ahora; DR y staging quedan pendientes.**
+  Claude propuso dejar tres cosas como pendientes para el C-2. Saqué el costo de tokens de esa
+  lista y pedí que se calculara ya, y quedaron como pendientes declarados solo la continuidad
+  y recuperación ante desastre y el ambiente de staging de la capacidad Fabric.
+
+- **El modelo de costos es un archivo de código con prueba, no un anexo del documento.**
+  Claude propuso embeber el script en un anexo del `.md` para no agregar archivos fuera de la
+  estructura del enunciado. Elegí `modulo_c/costos.py` con su `tests/test_costos.py`, porque
+  la prueba no verifica que Python sepa multiplicar sino que las cifras publicadas en el
+  documento sean las que produce el modelo: si mañana cambia una tarifa y alguien no actualiza
+  el texto, falla la prueba. Es la regla de hacer cumplir por máquina lo que no quiero dejar
+  encomendado a la memoria.

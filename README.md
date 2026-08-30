@@ -16,7 +16,8 @@ conversación. Las decisiones propias y su justificación están en `diario_deci
 | A-1 · `pipeline_demo.ipynb` | completo |
 | A-2 · Modelado, MLflow, SHAP y API | pendiente |
 | Módulo B · Lakehouse y MLOps | pendiente |
-| Módulo C · Arquitectura y RAG | pendiente |
+| C-1 · Arquitectura de plataforma | completo — `modulo_c/decisiones_arquitectura.md` |
+| C-2 · RAG sobre documentación técnica | pendiente |
 
 ## Próximo paso: Ejercicio A-2
 
@@ -123,6 +124,13 @@ repositorio-ds-mine/
         │   └── features.py       AurumFeatureBuilder
         ├── tests/                pruebas con pytest, sin dependencia del dataset
         └── pipeline_demo.ipynb   demo end-to-end (pendiente)
+└── modulo_c/
+    ├── decisiones_arquitectura.md  plataforma, gobernanza, costos y riesgos del C-1
+    ├── arquitectura.png            diagrama de fuentes a consumo
+    ├── ingesta_edge.png            camino del dato bajo conectividad intermitente
+    ├── costos.py                   modelo de costos, solo biblioteca estándar
+    ├── tests/                      fija las cifras que publica el documento
+    └── rag_minero/                 reservado para el C-2
 ```
 
 ## Decisiones que conviene conocer antes de leer el código

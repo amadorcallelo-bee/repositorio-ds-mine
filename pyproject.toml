@@ -7,10 +7,11 @@
 # dotfiles sueltos en la raiz.
 
 [tool.pytest.ini_options]
-testpaths = ["modulo_a/aurum_pipeline/tests"]
-pythonpath = ["modulo_a"]
+testpaths = ["modulo_a/aurum_pipeline/tests", "modulo_c/tests"]
+pythonpath = ["modulo_a", "modulo_c"]
 addopts = [
     "--cov=aurum_pipeline",
+    "--cov=costos",
     "--cov-report=term-missing",
     "--cov-fail-under=80",
     "-q",
@@ -24,8 +25,8 @@ omit = ["*/tests/*"]
 
 [tool.mypy]
 python_version = "3.12"
-files = ["modulo_a/aurum_pipeline"]
-mypy_path = "modulo_a"
+files = ["modulo_a/aurum_pipeline", "modulo_c"]
+mypy_path = "modulo_a:modulo_c"
 strict = true
 warn_unreachable = true
 # El notebook y los tests tambien se verifican; pandas no siempre tipa sus retornos, y
