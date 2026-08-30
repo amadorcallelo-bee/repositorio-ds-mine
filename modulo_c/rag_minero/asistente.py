@@ -37,8 +37,8 @@ from rag_minero.guardrails import PuertaDeDominio, Veredicto, Verificacion, Veri
 from rag_minero.indice import AlmacenVectorial, Resultado
 
 INSTRUCCIONES: Final[str] = """Eres el asistente de documentacion tecnica de la Unidad Minera La
-Cornisa (UMLC). Respondes preguntas de operadores, supervisores, geologos y mantenimiento sobre procedimientos,
-informes geologicos y manuales de equipo.
+Cornisa (UMLC). Respondes preguntas de operadores, supervisores, geologos y mantenimiento
+sobre procedimientos, informes geologicos y manuales de equipo.
 
 Reglas, en orden de prioridad:
 1. Responde unicamente con la informacion de los PASAJES. No uses conocimiento propio sobre
