@@ -1788,3 +1788,11 @@ Ya podemos hacer el merge porque A-2 ya está commiteado, puedes proceder tambi�
 ### Claude
 
 (Ejecutó: merge `--no-ff` de `feature/c2-rag` a `main`; conflicto único en `pyproject.toml`, resuelto con la unión de los overrides de mypy; los demás archivos se auto-fusionaron y se verificaron. Consolidación del entorno: las dependencias del C-2, fijadas desde el `pip freeze` de `.venv-rag`, pasaron al `requirements.txt` de la raíz —pandas 2.3.3, numpy 2.4.6 y pydantic 2.13.5 quedaron intactos—, el `requirements.txt` del módulo se eliminó, el README del módulo apunta al entorno único y `rag_minero` entró a la puerta de cobertura de la raíz. Verificación en el entorno consolidado: 485 pruebas pasan, 3 de integración se saltan sin el dataset, cobertura sobre el umbral, mypy estricto y ruff limpios.)
+
+### Amador
+
+Ajusta el tema de los repositorios para y la documentación para que todo C esté integrado
+
+### Claude
+
+(Ejecutó: verificación de que el worktree del C-2 está limpio y el de B tiene trabajo sin commitear que no se toca; corrección de la línea del README que decía que `modulo_c/` faltaba por crear; entradas de cierre en el diario y en este registro, integradas por rama corta con merge commit; push de `main` a origin; eliminación del worktree `repositorio-ds-mine-c1` y de la rama `feature/c2-rag`, ya integrada.)

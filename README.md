@@ -95,7 +95,8 @@ El EDA ya dejó medido lo que condiciona el resultado, y conviene leerlo antes d
   pliegues; la ventana elegida gobierna también el reajuste final. El techo del problema es R²
   0.9757 y el baseline causal llega a 0.9753, así que el entregable demuestra dónde está el
   límite en lugar de fabricar una victoria del modelo.
-- Faltan por crear `modulo_b/` y `modulo_c/`, que el enunciado lista en la estructura mínima.
+- Falta por crear `modulo_b/`, que el enunciado lista en la estructura mínima; `modulo_c/`
+  quedó completo con el C-1 y el C-2.
 
 ## Ejecutar en un entorno limpio
 
