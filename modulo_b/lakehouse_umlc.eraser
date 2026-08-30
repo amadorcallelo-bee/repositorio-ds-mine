@@ -1,0 +1,52 @@
+// Fuente del diagrama modulo_b/lakehouse_umlc.png, en el DSL de Eraser (cloud architecture).
+// Se versiona para que el diagrama se pueda regenerar; la imagen sola no se puede editar.
+title Lakehouse Medallion UMLC (Ejercicio B-1)
+direction right
+
+Fuentes [icon: server, color: gray] {
+  OPUS [label: "OPUS-MINE telemetria\nCSV cada 30 min, 4 anios", icon: activity]
+  Lab [label: "Laboratorio\nreclasifica tipo_mineral", icon: flask]
+}
+
+Landing [label: "Volume landing\nbronze/landing", icon: folder, color: gray]
+
+Catalogo [label: "Unity Catalog: lakehouse_umlc", icon: databricks] {
+
+  Bronze [label: "bronze (crudo)", icon: database, color: orange] {
+    opus_raw [label: "opus_raw\nDelta, part. fecha_ingesta\nschema explicito, append", icon: table]
+    ingesta_log [label: "ingesta_log\narchivo, ts, filas por lote", icon: list]
+  }
+
+  Silver [label: "silver (validado)", icon: database, color: silver] {
+    opus_clean [label: "opus_clean\nDelta, part. anio_mes\nhora local America/Lima\nturno recalculado, CDF ON", icon: table]
+    cuarentena [label: "opus_cuarentena\nfilas rechazadas", icon: alert-triangle]
+  }
+
+  DQ [label: "dq_reports", icon: database, color: blue] {
+    reporte [label: "reporte_calidad\nuna fila por regla y lote", icon: check-square]
+  }
+
+  Gold [label: "gold (KPI)", icon: database, color: gold] {
+    kpi [label: "aurum_kpi_turno\nfrente x fecha_local x turno\nZ-ORDER (frente_id, fecha_local)", icon: bar-chart]
+  }
+}
+
+Consumo [icon: users, color: gray] {
+  Fabric [label: "Microsoft Fabric (B-2)\nsemantico, RLS por sector", icon: bar-chart-2]
+  Drift [label: "Drift + MLflow (B-3)\nPSI ley y vibracion", icon: trending-up]
+  API [label: "API /predict (Modulo A)", icon: cloud]
+}
+
+OPUS > Landing: lotes CSV simulados
+Lab > Landing: 3 lotes de correccion
+Landing > opus_raw: Auto Loader, availableNow
+Landing > ingesta_log: metadata del lote
+opus_raw > opus_clean: reglas del diccionario, dedup
+opus_raw > cuarentena: filas invalidas
+opus_raw > reporte: DQ por lote
+Landing > opus_clean: MERGE por (ts_opus_utc, frente_id)
+opus_clean > kpi: agregacion, MERGE via table_changes
+kpi > Fabric
+kpi > Drift
+opus_clean > Drift: ultimos 30 dias
+kpi > API

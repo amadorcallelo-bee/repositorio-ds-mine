@@ -12,3 +12,7 @@ mlruns/
 # El extracto OPUS es dato de negocio, no codigo: vive en data/ y no entra a la historia
 # de git. La ruta se resuelve por AURUM_CSV_PATH o por el propio directorio data/.
 data/
+
+# Estado local del Databricks Asset Bundle del Modulo B: lo escribe la CLI en cada deploy y
+# apunta a un workspace concreto, asi que no es parte del codigo.
+modulo_b/.databricks/

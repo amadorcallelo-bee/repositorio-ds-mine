@@ -1,0 +1,72 @@
+# Databricks Asset Bundle del Ejercicio B-1.
+#
+# Un solo comando despliega los tres notebooks y el paquete `umlc_lakehouse` al workspace y
+# define el job que los encadena. No se declara computo: los notebooks corren en serverless,
+# que es lo que el workspace de la prueba ofrece y lo que evita pagar un cluster ocioso.
+#
+# El host y las credenciales salen del perfil de la CLI, nunca de este archivo:
+#     databricks bundle validate -p <perfil>
+#     databricks bundle deploy   -p <perfil>
+#     databricks bundle run lakehouse_umlc_b1 -p <perfil>
+bundle:
+  name: lakehouse_umlc
+
+sync:
+  exclude:
+    - "**/__pycache__/**"
+    - "umlc_lakehouse/tests/**"
+
+variables:
+  catalogo:
+    description: Catalogo de Unity Catalog donde vive el lakehouse.
+    default: lakehouse_umlc
+
+resources:
+  jobs:
+    lakehouse_umlc_b1:
+      name: lakehouse_umlc_b1
+      description: >-
+        B-1 medallion UMLC: bronze incremental, silver con reporte de calidad, gold
+        completa, correcciones del laboratorio (CDC) y gold incremental.
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: bronze
+          notebook_task:
+            notebook_path: ./01_bronze.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+        - task_key: silver_limpieza
+          depends_on:
+            - task_key: bronze
+          notebook_task:
+            notebook_path: ./02_silver.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+              etapa: limpieza
+        - task_key: gold_inicial
+          depends_on:
+            - task_key: silver_limpieza
+          notebook_task:
+            notebook_path: ./03_gold.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+        - task_key: silver_correcciones
+          depends_on:
+            - task_key: gold_inicial
+          notebook_task:
+            notebook_path: ./02_silver.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+              etapa: correcciones
+        - task_key: gold_incremental
+          depends_on:
+            - task_key: silver_correcciones
+          notebook_task:
+            notebook_path: ./03_gold.py
+            base_parameters:
+              catalogo: ${var.catalogo}
+
+targets:
+  dev:
+    default: true
+    mode: development

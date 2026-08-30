@@ -586,3 +586,86 @@ Privados. Procede
 (Ejecutó: creación del worktree `../repositorio-ds-mine-c1` sobre rama nueva `feature/c1-arquitectura` desde `main`, sin tocar el checkout donde corre el A-2; creación de dos archivos privados en Eraser y de sus diagramas escritos a mano en DSL, porque la generación por IA de Eraser agotó su cuota; reajuste del diagrama de arquitectura tras revisar el render, que había quedado disperso; exportación de ambos a PNG dentro del repositorio; redacción de `modulo_c/costos.py` con solo biblioteca estándar y `Decimal`, de `modulo_c/tests/test_costos.py` que fija las cifras publicadas, y de `modulo_c/decisiones_arquitectura.md`; incorporación de `modulo_c` a la configuración de pytest, cobertura y mypy; corrección de tres filas de volumetría del documento que estaban mal etiquetadas.)
 
 95 pruebas, cobertura 99.81%, mypy estricto y ruff limpios. Ninguna cifra del documento se escribió a mano: todas salen de ejecutar `costos.py`, y la prueba falla si el documento y el modelo se desincronizan.
+
+## 2026-08-30 — Módulo B, Ejercicio B-1
+
+### Amador
+
+Necesitamos avanzar y en una términal estamos terminando el A-2 y en la otra estamos terminando el C-2. En esta sesión haremos el módulo B completo y por eso necesito que lo leas y lo comprendas. Comenzaremos con el B-1. Recuerda que debes ser conciso en las respuestas porque tienes la mala práctica de usar mucho texto en tus respuestas. | Revisa "https://docs.databricks.com/aws/en/lakehouse/medallion" para que tengas tan claro como yo la arquitectura medallion. Nota que nos dan en el .docx una estructura que debemos respetar "lakehouse_umlc/
+├── bronze/opus_raw/        # Delta, partición por fecha_ingesta
+├── silver/opus_clean/      # Delta, partición justificada
+├── gold/aurum_kpi_turno/   # Delta, Z-ORDER argumentado
+└── dq_reports/             # Reportes de calidad por lote
+". | Hazme una propuesta que evaluaré para proceder con el B-1; a tu propuesta agregale un diagrama similar al que te pasé de databricks pero que muestre nuestro caso en eraser.io. | Espera mi aprobación explícita para implementar y recuerda siempre hacer revisión adversarial. Además, recuerda que vamos a usar siempre el cli (como databricks cli) para ahorrar tiempo y siempre haremos una estimación de los costos antes de hacer cualquier cosa en nube para evitar sorpresas
+
+### Claude
+
+(Ejecutó: lectura del enunciado `.docx`, del README, del diario y del estado del repositorio; lectura de la página de medallion y de la guía de particionamiento de Databricks; inspección del workspace por CLI —perfil, identidad, clusters, warehouse, catálogos, storage—; conteos sobre el extracto para dimensionar el lakehouse; verificación de que no hay Java en la máquina; intento de generar el diagrama con la IA de Eraser, que devolvió "crédito agotado", y escritura a mano del diagrama en el DSL de Eraser; cálculo del rango de costos en Python con `Decimal`.)
+
+Propuesta del B-1: mapeo del árbol del enunciado a un catálogo `lakehouse_umlc` con esquemas `bronze`, `silver`, `gold` y `dq_reports` y un volumen de landing; bronze con Auto Loader, esquema explícito y partición por `fecha_ingesta` justificada por operación; silver con hora local `America/Lima`, turno recalculado, centinela a nulo sin imputar, alertas contra rechazos, `MERGE` idempotente, Change Data Feed y partición por `anio_mes`; gold `aurum_kpi_turno` sin partición y con `ZORDER BY (frente_id, fecha_local)`; CDC con tres lotes de reclasificación, `MERGE` que solo actualiza lo que cambia y gold incremental por `table_changes`; una tabla `bronze.lab_reclasificacion` para las correcciones crudas; estructura `modulo_b/` con Asset Bundle, tres notebooks y un paquete `umlc_lakehouse` probado en local con pyspark. Rango de costos 1.6 a 7.9 USD con los supuestos declarados. Revisión adversarial de siete puntos y ocho decisiones para Amador: partición de silver, definición de la eficiencia de avance, horas efectivas, producción recalculada, Auto Loader o `COPY INTO`, DQ como tabla o archivos, instalar el JDK, y cómo confirmar precios.
+
+### Amador
+
+❯ 1. Me gusta el diagrama, debes traerlo al directorio de todo el módulo B. 2. Siento que la tabla bronze.lab_reclasificacion está de más. | Ahora respondiendo a tus preguntas: 1. No recuerdo donde dicen las instrucciones que lo tenemos que hacer con anio_mes. 2. A qué te refieres con p95? Intenta leer nuevamente los pdfs que sí puedes. 3. Recomendado. 4. Recomendado. 5. Qué es? 6. De acuerdo. 7. Es necesario?, qué otras opciones tenemos? 8. confirma
+
+### Claude
+
+(Ejecutó: consulta de `system.billing.list_prices` y `system.billing.usage` en el warehouse —dos sentencias, el mínimo de un minuto cada una—; instalación de `pypdf` en el scratchpad, no en un venv, y lectura completa de los tres PDF.)
+
+Precios confirmados: jobs serverless 0.35 USD/DBU, notebooks 0.75, SQL 0.70, nivel Premium, iguales a los supuestos; consumo facturado hasta el momento 0.00 USD. Aceptó las dos observaciones: el diagrama va a `modulo_b/` con su fuente `.eraser`, y la tabla `bronze.lab_reclasificacion` se elimina porque el archivo en el volumen ya es el registro crudo. Aclaró que `anio_mes` no está en el enunciado sino que es su recomendación, y volvió a listar las tres opciones. Explicó el percentil 95 y, tras leer el manual, propuso `avg(avance_mmin) / 3.5` con el rango normal del sensor LVDT como fuente; señaló que el manual documenta el centinela `-1` con el código `E-ELEC-04` y que las recuperaciones del informe geológico no coinciden con los factores implícitos en `prod_estimada_oz`. Explicó Auto Loader. Sobre el JDK: es necesario porque Spark corre en una JVM; opciones `brew`, `install-jdk` dentro del venv, Databricks Connect con costo por sesión, o no probar Spark; recomendó `brew`.
+
+### Amador
+
+apruebo 1, 2 y 7. procede. recuerda hacer revisión adversorial y verifica que sí respondemos lo que nos preguntan
+
+### Amador
+
+Mira, debes tener mucho cuidado con el venv o el requirements o cualquier otro archivo o directorio para no afectar a los otros dos agentes. Valida esto para que conozcas tus límites de serguridad y no cometamos errores graves
+
+### Claude
+
+(Ejecutó, en orden: validación de los límites —el árbol principal y `.venv` son del A-2, `../repositorio-ds-mine-c1` y `.venv-rag` del C-2—; creación del worktree `../repositorio-ds-mine-b1` con rama `feature/b1-lakehouse` desde `main`, que ya incluía el C-1; `brew install openjdk@21`; venv propio con los requirements de `main` más `pyspark 4.2.0` y `delta-spark 4.4.0`; prueba de humo de Spark y Delta en local con Change Data Feed y `ZORDER`; escritura del paquete `modulo_b/umlc_lakehouse/` —dominio, errores, catálogo, esquema, ingesta, limpieza, calidad, kpi, gold, cdc, simulación— y de sus pruebas; extensión de `pyproject.toml` para pytest, cobertura, mypy y ruff; corrección de tres defectos que las pruebas encontraron: los `datetime` naive se interpretaban en la zona de la máquina y no en UTC, un `MERGE` sin cambios no escribe versión y las métricas se leían de la operación anterior, y un anti-join perezoso contra el mismo log que se estaba llenando devolvía vacío; generación de los cuatro lotes de llegada y los tres de corrección desde el extracto; escritura de los tres notebooks y del Asset Bundle; segundo diseño de los notebooks sin `foreachBatch`; intento de crear el catálogo `lakehouse_umlc` por CLI, rechazado por el workspace ("use la UI"), y uso del catálogo `workspace`; creación de esquemas y volumen por CLI y carga de los siete archivos; `bundle deploy` y dos `bundle run` del job de cinco tareas en serverless; escritura de `docs/lakehouse.md`, README, diario e `ia_usage.md`.)
+
+Decisiones tomadas por la herramienta que Amador no ratificó y que quedan aquí para su resolución: las pruebas viven dentro del paquete (`modulo_b/umlc_lakehouse/tests/`), como en el A-1, porque un directorio `tests` en `modulo_b/` chocaba con el de `modulo_c/` en el `pythonpath`; los notebooks no usan `foreachBatch` porque en serverless corren bajo Spark Connect, la función se ejecuta en el servidor y el estado del cliente no llega a ella, así que Auto Loader escribe directo a bronze y el log se completa en batch, y silver y las correcciones se procesan en batch con `reporte_calidad` e `ingesta_log` como libros de control; el catálogo de la corrida es `workspace` porque el trial usa Default Storage y ni la API ni la CLI pueden crear catálogos; y el reporte de calidad hace de libro de control de silver. Resultados: 179 pruebas, cobertura 99.22%, mypy estricto y ruff limpios; primera corrida en 4 min 3 s con bronze 4 lotes y 50 000 filas, silver 50 000 válidas y 0 en cuarentena con cero discrepancias de turno, gold 4 019 celdas, tres lotes de corrección con 120 actualizadas, 10 sin cambio, 5 sin evento y 5 inválidas, y gold incremental con 98 celdas recalculadas; segunda corrida sin trabajo en ninguna tarea.
+
+### Amador
+
+1. ya está creada, no? 2. muestrame los puntos 1 y 4 nuevamente para yo decidir. 3. El commit aún no, pero podemos avanzar en otra dirección? todavía A-2 no se consolida, aunque pronto lo conseguiré
+
+### Claude
+
+(Ejecutó: listado de catálogos y esquemas por CLI.)
+
+Aclaró que `lakehouse_umlc` no existía —solo `workspace`, `system` y `samples`— y que todo había corrido en `workspace` por el rechazo de la API. Volvió a exponer los dos puntos sin ratificar: el diseño sin `foreachBatch` (Spark Connect ejecuta la función en el servidor; Auto Loader escribe directo a bronze y el log se completa en batch; silver y correcciones en batch con `reporte_calidad` e `ingesta_log` como libros de control; el costo es una sola versión por corrida en `ingesta_log`) y la ubicación de las pruebas dentro del paquete por el choque de dos paquetes `tests` en el `pythonpath`. Para avanzar propuso B-3 (drift por PSI, trigger y rollback en MLflow, 0.1 a 0.5 USD) o B-2 si hay capacidad de Fabric, y recomendó B-3.
+
+### Amador
+
+1. Ya lo voy a crear, [captura del diálogo de creación de catálogo], cuál tipo me recomiendas? pienso que normal
+
+### Claude
+
+Normal: es el catálogo gestionado, igual que `workspace`; Externa federa bases externas, Compartidos es Delta Sharing y Lakebase es Postgres.
+
+### Amador
+
+Ya lo cree
+
+### Claude
+
+(Ejecutó: verificación del catálogo por CLI; creación de los cuatro esquemas y del volumen `lakehouse_umlc.bronze.landing`; carga de los siete archivos; `bundle deploy --var catalogo=lakehouse_umlc` y `bundle run` del job, 4 min 14 s, con los mismos resultados que la validación —4 lotes y 50 000 filas en bronze, 50 000 válidas y 0 en cuarentena en silver, 4 019 celdas en gold, 120 correcciones aplicadas y 98 celdas recalculadas—; actualización de `docs/lakehouse.md` y del README con la corrida definitiva; borrado de los esquemas `bronze`, `silver`, `gold` y `dq_reports` del catálogo `workspace`, dejando `default` y `rag_minero`.)
+
+### Amador
+
+recuerdame los dos puntos que están aviertos
+
+### Claude
+
+Expuso de nuevo los dos puntos: el diseño sin `foreachBatch` (con su costo, una versión por corrida en `ingesta_log`) y las pruebas dentro del paquete por el choque de dos paquetes `tests`.
+
+### Amador
+
+estoy de acuerdo con ambas, es justo lo que estaba pensando. procede y haz revisión adversorial, una vez implementada dime qué falta para cerrar b-1 y continuar con b-2 y b-3
+
+### Claude
+
+(Ejecutó: registro de las dos ratificaciones en el diario; revisión adversarial del B-1 completo con dos correcciones —la extensión `.CSV` en mayúsculas dejaba el `lote_id` vacío, y las correcciones se registraban en `ingesta_log` antes de aplicarse, de modo que un fallo a medias las daba por hechas; ahora se aplican primero— con su prueba; verificaciones completas y redespliegue del bundle.)
