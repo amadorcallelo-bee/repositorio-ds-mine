@@ -20,7 +20,7 @@ conversación. Las decisiones propias y su justificación están en `diario_deci
 | A-2 · Error de entrenamiento, brecha y diagnóstico de sobreajuste | completo, registrado en MLflow |
 | Módulo B · Lakehouse y MLOps | pendiente |
 | C-1 · Arquitectura de plataforma | completo — `modulo_c/decisiones_arquitectura.md` |
-| C-2 · RAG sobre documentación técnica | pendiente |
+| C-2 · RAG sobre documentación técnica | completo — `modulo_c/rag_minero/README.md`, demo ejecutada |
 
 ## Resultado del Ejercicio A-2
 
@@ -277,7 +277,12 @@ repositorio-ds-mine/
     ├── ingesta_edge.png            camino del dato bajo conectividad intermitente
     ├── costos.py                   modelo de costos, solo biblioteca estándar
     ├── tests/                      fija las cifras que publica el documento
-    └── rag_minero/                 reservado para el C-2
+    └── rag_minero/                 asistente RAG del C-2
+        ├── README.md               respuestas a las cinco preguntas, con las métricas
+        ├── documentos.py, chunking.py, guardrails.py, indice.py, asistente.py, evaluacion.py, flujo.py
+        ├── golden_set.json, preguntas_control.json
+        ├── rag_demo.ipynb          demo ejecutada contra Databricks Vector Search
+        └── tests/                  168 pruebas sobre documentos sintéticos
 ```
 
 `modeling/` y `serving/` son paquetes separados por una razón de dependencias, no de orden:

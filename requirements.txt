@@ -39,6 +39,21 @@ fastapi==0.141.1
 uvicorn==0.52.4
 pydantic==2.13.5
 
+# Asistente RAG del Ejercicio C-2. Comparte pandas, numpy y pydantic con el modulo A;
+# el resto es lectura de PDF, almacen vectorial local, SDK de Databricks y evaluacion RAGAS.
+langchain==1.2.10
+langchain-core==1.6.1
+langchain-community==0.4.1
+langchain-chroma==1.1.0
+chromadb==1.5.9
+rank-bm25==0.2.2
+databricks-langchain==0.20.0
+databricks-sdk==0.94.0
+databricks-vectorsearch==0.75
+pdfplumber==0.11.10
+ragas==0.4.3
+openai==2.54.0
+
 # Calidad: pruebas, cobertura, tipos y linter.
 # httpx2 lo pide `starlette.testclient`, que deprecio httpx para el cliente de pruebas.
 pytest==9.1.1
