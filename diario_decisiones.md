@@ -736,3 +736,31 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   monitoreo y el reentrenamiento en jobs con su propio schedule, y así queda: job
   `lakehouse_umlc_mlops` con cadencia diaria declarada y pausada, porque encenderla es una
   decisión de operación y no un costo que la prueba deba correr sola.
+
+## 2026-08-30 — Módulo B, Ejercicio B-2
+
+- **El B-2 se cierra como diseño documentado, no como despliegue.** Intenté varias veces
+  conseguir capacidad de Fabric y mi cuenta nueva no la otorga. Consideré dejarlo como
+  pendiente, pero elegí entregarlo como diseño completo —documento más diagrama— con la
+  limitación dicha sin rodeos, porque un diseño verificable vale más que una promesa y la
+  defensa puede sustentarse igual. Pedí pragmatismo y cero sobreingeniería.
+
+- **Réplica por espejo del catálogo, sin copia.** De las tres opciones que Claude comparó
+  elegí el espejo (Mirrored Databricks Catalog): es la implementación nativa de la regla que
+  yo mismo fijé en el C-1 —una sola copia física, solo cruza Gold—. Descarto el shortcut S3
+  porque el Default Storage del trial no expone credenciales, y la copia programada porque
+  son dos verdades que reconciliar.
+
+- **La tabla `fallas_equipo_semana` queda especificada, no construida.** El diseño del B-2
+  reveló que gold no tiene la dimensión equipo y la tendencia semanal de fallas la necesita.
+  Consideré construirla en Databricks, que costaba centavos, pero elegí especificarla en el
+  documento columna por columna: la prueba se cierra hoy y el hallazgo documentado demuestra
+  lo mismo que la tabla construida.
+
+- **La demostración de RLS son cifras esperadas, calculadas del extracto real.** Sin
+  capacidad no hay "View as role"; elegí que el protocolo de verificación lleve los números
+  que debe reproducir —el jefe de Veta-Sur ve exactamente 4 frentes y 1 176 de las 4 019
+  celdas— calculados en local con las clases probadas del B-1, sin gastar nube.
+
+- **Cierre y push.** Con el B-2 documentado doy la prueba por cerrada: pedí que todo quede
+  integrado en `main` y pusheado a origin.

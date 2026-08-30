@@ -19,7 +19,7 @@ conversación. Las decisiones propias y su justificación están en `diario_deci
 | A-2 · `modeling_demo.ipynb` | completo |
 | A-2 · Error de entrenamiento, brecha y diagnóstico de sobreajuste | completo, registrado en MLflow |
 | B-1 · Lakehouse medallion en Databricks | completo — `modulo_b/`, [`docs/lakehouse.md`](docs/lakehouse.md) |
-| B-2 · Fabric y orquestación | pendiente |
+| B-2 · Fabric y orquestación | diseñado y documentado — la cuenta no otorga capacidad de Fabric — [`docs/fabric.md`](docs/fabric.md) |
 | B-3 · MLOps: deriva, re-entrenamiento y rollback | completo — `modulo_b/04_mlops.py`, [`docs/mlops.md`](docs/mlops.md) |
 | C-1 · Arquitectura de plataforma | completo — `modulo_c/decisiones_arquitectura.md` |
 | C-2 · RAG sobre documentación técnica | completo — `modulo_c/rag_minero/README.md`, demo ejecutada |
@@ -136,6 +136,18 @@ En una línea cada uno, con el detalle en [`docs/mlops.md`](docs/mlops.md):
 - **Las dos ramas quedan demostradas de forma determinista** sobre un modelo `_demo` en
   memoria: rollback (6.02 contra 3.04 g/t) y promoción (0.26 g/t), sin contaminar silver ni
   gold.
+
+## Resultado del Ejercicio B-2
+
+La cuenta del trial no otorga capacidad de Fabric (cuenta nueva, intentado varias veces),
+así que el B-2 se entrega como **diseño completo**: réplica de gold por espejo del catálogo
+de Databricks (cero copia, coherente con la costura del C-1), modelo semántico Direct Lake
+con las tres medidas en DAX, pipeline de 30 minutos que orquesta en vez de copiar, alerta
+del 5 % por Activator con la corrección que los datos exigen (mínimo de eventos: el último
+turno del extracto daría 12.5 % con una sola falla en 8 eventos), y RLS por grupos de Entra
+ID con un protocolo de demostración cuyas cifras esperadas están calculadas del extracto
+real: el jefe de Veta-Sur debe ver exactamente 4 frentes y 1 176 de las 4 019 celdas.
+Detalle en [`docs/fabric.md`](docs/fabric.md) y diagrama en `modulo_b/fabric_b2.png`.
 
 ## Ejecutar en un entorno limpio
 
@@ -320,7 +332,8 @@ repositorio-ds-mine/
 │   ├── tabla_resultado.md        las 30 columnas de salida: unidades, lectura y advertencias
 │   ├── modelado.md               decisiones del A-2 y la medición que las sostiene
 │   ├── lakehouse.md              decisiones del B-1 y las cifras de la corrida que las sostienen
-│   └── mlops.md                  decisiones del B-3: PSI, trigger, rollback y sus corridas
+│   ├── mlops.md                  decisiones del B-3: PSI, trigger, rollback y sus corridas
+│   └── fabric.md                 diseño del B-2: espejo, Direct Lake, alerta y RLS con cifras
 ├── modulo_a/
     ├── exploration/
     │   └── eda_opus.ipynb        análisis exploratorio, una sección por variable
@@ -359,6 +372,7 @@ repositorio-ds-mine/
 │   ├── 03_gold.py                aurum_kpi_turno, Z-ORDER e incremental por Change Data Feed
 │   ├── 04_mlops.py               B-3: deriva por PSI, trigger, staging y rollback en MLflow
 │   ├── lakehouse_umlc.png        diagrama del lakehouse (fuente: lakehouse_umlc.eraser)
+│   ├── fabric_b2.png             diagrama del diseño B-2 en Fabric (fuente: fabric_b2.eraser)
 │   └── umlc_lakehouse/           la lógica, probada en local sobre Spark
 │       ├── dominio.py            reglas del dominio y nombres del lakehouse
 │       ├── catalogo.py           catálogo, esquemas y tablas calificados
