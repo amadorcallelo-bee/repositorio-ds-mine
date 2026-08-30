@@ -38,7 +38,39 @@ sobreingeniería: es un entregable acotado que el evaluador debe leer completo
 en pocos minutos. Aplican las prácticas de la skill `repositorios` para ramas,
 commits y PR.
 
-## 5. Archivos de trazabilidad (raíz)
+## 5. Prácticas de código (obligatorias en todo ajuste o escritura)
+
+Estos cuatro puntos aplican a cada línea de código del proyecto, no solo al
+Módulo A. Si un cambio no los cumple, no está terminado.
+
+1. **OOP.** Clases con una responsabilidad clara, contrato explícito y estado
+   propio. Nada de funciones sueltas mutando DataFrames globales. La herencia se
+   usa para compartir contrato (clase abstracta con métodos abstractos), no para
+   reutilizar código por conveniencia; para eso, composición. Los objetos validan
+   sus precondiciones y fallan con una excepción propia y descriptiva, no con un
+   `KeyError` a treinta líneas de distancia.
+
+2. **Testing.** pytest, con cobertura mínima del 80% verificada por la
+   herramienta y no por promesa (`--cov-fail-under=80`). Todo defecto corregido
+   deja una prueba que lo reproduce. Los casos borde son parte del mínimo, no un
+   extra: valores especiales, ventanas vacías, categorías no vistas, límites
+   exactos de un umbral, y fuga de información donde el diseño la permita. Las
+   pruebas no dependen del CSV de la prueba: se construyen sobre datos sintéticos
+   pequeños y deterministas, para que corran en un entorno limpio.
+
+3. **Typing.** Anotaciones completas en toda firma pública y privada, incluido el
+   retorno. Verificado con mypy en modo estricto, también por herramienta. Los
+   tipos del dominio se nombran (alias de tipo, `Literal`, `TypedDict`) antes que
+   repetir `str` o `dict` por todas partes.
+
+4. **Documentación.** Docstring en cada módulo, clase y función pública, que
+   explique **por qué** existe y qué decisión encarna, no qué hace línea por
+   línea. Donde una decisión tenga alternativa razonable, el docstring dice cuál
+   se descartó y por qué. Los comentarios en línea se reservan para lo que el
+   código no puede decir por sí mismo. La documentación del proyecto se actualiza
+   en el mismo cambio que la provoca, nunca después.
+
+## 6. Archivos de trazabilidad (raíz)
 
 - `diario_decisiones.md`: **las decisiones de Amador, no las tuyas.** Se escribe
   en primera persona con Amador como sujeto, en formato "consideré X pero elegí

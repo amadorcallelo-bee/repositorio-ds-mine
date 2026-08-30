@@ -163,3 +163,110 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   archivo se lee como orden de emisión y no como secuencia de operación concurrente. El supuesto
   queda enunciado como supuesto: lo demostrado es que el archivo es un flujo serial, no cuántas
   máquinas tiene la unidad minera.
+
+## 2026-08-30 — Ejercicio A-1: primeros transformadores
+
+- **Figuras estáticas en lugar de interactivas.** Había pedido llevar todas las figuras del
+  EDA a Plotly por la interactividad, y funcionó: el hover permite leer valores exactos sin
+  agregar celdas. Pero GitHub no renderiza Plotly con ningún mecanismo, y el repositorio es
+  privado, así que quien me evalúe lo va a recorrer en el navegador y vería celdas de figura
+  vacías. Consideré dejar Plotly y advertirlo en el README, pero elegí volver a seaborn sobre
+  matplotlib porque la decisión la manda el destinatario y no la tecnología: el notebook ya
+  no es una herramienta para explorar, es un documento para ser leído, y una figura que el
+  lector no ve es peor que una figura que no puede interrogar. La alternativa de emitir
+  ambas representaciones exige `kaleido`, que a su vez exige un Chrome instalado, y eso
+  rompe la promesa de "ejecutable en entorno limpio" del README.
+
+- **El extracto vive en `data/`, ignorado por git.** Veníamos leyendo el CSV desde un
+  directorio hermano al repositorio, fuera de él. Consideré dejarlo así, pero elegí traer una
+  copia a `data/` en la raíz y agregar ese directorio al `.gitignore`, porque el proyecto
+  tiene que ser autocontenido para cualquiera que lo clone sin dejar de excluir el dato de la
+  historia de git. El orden de búsqueda queda documentado: `AURUM_CSV_PATH`, luego `data/`,
+  luego el directorio hermano.
+
+- **Las cuatro prácticas quedan escritas, no repetidas.** OOP, testing, typing y
+  documentación son criterio de evaluación explícito del enunciado y yo se las venía pidiendo
+  a la herramienta en cada tarea. Elegí escribirlas como sección propia del `CLAUDE.md` con
+  criterio verificable por herramienta —cobertura mínima forzada por configuración, mypy
+  estricto— en vez de dejarlas como intención: una regla que depende de que alguien la
+  recuerde no es una regla.
+
+- **`flag_imputed` se implementa literal.** El enunciado dice "si n<5, marca la fila con
+  `flag_imputed=True` en lugar de imputar", lo que significa que la bandera marca lo **no**
+  imputado. Se me propuso agregar una segunda columna con la semántica inversa por si el
+  modelado la necesitaba; consideré aceptarla, pero elegí ceñirme a la letra del enunciado y
+  no crear columnas que nadie pidió todavía. Si el Ejercicio A-2 la necesita, se agrega ahí,
+  con la justificación puesta en su momento.
+
+- **scikit-learn sí, pero sin heredar de `TransformerMixin`.** Voy a usar scikit-learn en el
+  modelado del A-2. Consideré que `AurumTransformer` heredara de `BaseEstimator` y
+  `TransformerMixin` para componer con `Pipeline` gratis, pero elegí una clase abstracta
+  propia porque el enunciado pide exactamente eso —`fit()`, `transform()` y
+  `fit_transform()`— y porque atar la pieza más central del paquete a las convenciones de un
+  framework obliga a conocerlas para entender qué hace `fit_transform`. La firma conserva la
+  convención `fit(X, y=None)`, de modo que los objetos siguen encajando en una `Pipeline` por
+  duck typing si conviene.
+
+- **`pyproject.toml` solo para configuración.** No empaqueta ni declara dependencias: las
+  dependencias siguen en `requirements.txt` con `venv`, que es lo que un evaluador puede
+  reproducir sin instalar antes un gestor. El archivo existe para que pytest, mypy y ruff se
+  configuren en un lugar en vez de en tres dotfiles sueltos en la raíz.
+
+- **`AurumFeatureBuilder` se detiene hasta comparar.** Tengo mi propia tabla de features
+  pensada desde el dominio. Consideré dejar que la herramienta implementara la suya y
+  corregir después, pero elegí pedir primero la tabla detallada y compararla contra la mía,
+  porque las features son la parte del ejercicio donde se evalúa criterio minero y no
+  destreza de programación: una feature que no puedo defender en la entrevista no sirve
+  aunque el código esté impecable.
+
+- **La media, no la mediana, para resumir la ley reciente.** Consideré la mediana por
+  coherencia con el imputador, que la usa por mandato del enunciado, pero elegí la media
+  después de medirlo: dentro de cada frente la ley es simétrica (asimetría +0.03) y sin
+  contaminación —el centinela ya lo trató el imputador aguas arriba—, y ahí la media es el
+  estimador eficiente. Gana en RMSE, MAE, correlación y en R² sobre el objetivo real, 0.9695
+  contra 0.9671. La robustez de la mediana protege de algo que en ese punto del pipeline ya
+  no existe. El estadístico queda como parámetro configurable, por si aparece un centinela no
+  declarado.
+
+- **La vibración entra como feature.** No aparece en la matriz de correlación —su coeficiente
+  con la ley es 0.004— y por eso casi la dejo fuera, pero elegí incluirla porque el criterio
+  de la matriz no ve relaciones de umbral: sobre 12 m/s2 la tasa de falla es 17.1% contra
+  3.3% de base, el umbral del diccionario coincide con el salto real del dato, y solo el 19%
+  de esos registros supera también el umbral de temperatura, así que no es información
+  repetida. Va como bandera y no como magnitud, porque con 140 casos el dato no sostiene una
+  forma continua.
+
+- **El umbral térmico de las features es 88 °C, no los 95 °C del diccionario.** Al verificar
+  si la magnitud del exceso de temperatura servía, apareció que la relación es un escalón:
+  hasta 87 °C la tasa de falla ronda el 2% y entre 88 y 89 salta al 22%, quedando plana de ahí
+  en adelante. Consideré quedarme con el umbral publicado, que es lo que pide literalmente el
+  enunciado para las banderas de anomalía, pero elegí llevar las dos: la de 95 °C porque el
+  enunciado pide banderas según los rangos del diccionario, y la de 88 °C porque captura el
+  49% de las fallas contra el 12% de la otra, con la misma precisión. Y descarté la feature
+  continua del exceso, porque por encima del umbral la magnitud no discrimina (correlación
+  +0.02).
+
+- **El objetivo de clasificación se declara limitado antes de modelarlo.** Medí el objetivo
+  literal del enunciado —falla del mismo equipo en las próximas cuatro horas— y ninguna
+  condición observable mueve la tasa base de 3.05%. La detección contemporánea sí funciona
+  (22.7% sobre 88 °C). Consideré no mencionarlo y dejar que el modelo del A-2 hablara por sí
+  solo, pero elegí dejarlo escrito en el EDA antes de modelar, porque presentar después un
+  clasificador a cuatro horas como si funcionara sería un error de lectura, y porque la
+  discusión de métrica del A-2 se apoya justamente en esto.
+
+- **La demo es verificación, no ilustración.** Consideré que `pipeline_demo.ipynb` fuera un
+  recorrido narrado de los transformadores, que es lo que se suele entregar, pero elegí que
+  además compruebe sobre las cincuenta mil filas reales lo que las pruebas fijan sobre datos
+  sintéticos: que ningún rezago replique su propia fila, que ninguna antigüedad sea cero, que
+  no sobreviva un centinela y que ninguna columna original cambie. Una fuga de información no
+  se manifiesta como error sino como una métrica sospechosamente buena, así que el lugar donde
+  se ejecuta con datos verdaderos es el lugar donde hay que buscarla. La tabla consolidada se
+  muestra completa, con sus primeras cincuenta filas, para que el evaluador vea el resultado y
+  no solo el resumen.
+
+- **Revisión adversarial antes de pasar al A-2.** Consideré seguir con el modelado, que es lo
+  que puntúa, pero elegí detenerme a revisar en contra de lo construido: contrastar el
+  entregable contra la letra del enunciado y buscar los errores que las pruebas verdes no
+  pueden encontrar, porque son las pruebas mismas las que se escriben con los supuestos del
+  autor. La revisión encontró tres cosas para corregir y dos para decidir; queda registro de
+  todas, incluidas las que se midieron y se decidió no cambiar.
