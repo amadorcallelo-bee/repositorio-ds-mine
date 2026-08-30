@@ -26,9 +26,10 @@ tokens que el asistente.
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import json
 import statistics
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Protocol
@@ -357,7 +358,7 @@ class EvaluadorRagas:
         if self._presupuesto is not None:
             self._presupuesto.reservar(self._tokens_por_metrica * len(self._metricas))
         contextos = list(contextos_planos(respuesta))
-        valores = asyncio.run(self._puntuar(caso, respuesta, contextos))
+        valores = _ejecutar(self._puntuar(caso, respuesta, contextos))
         if self._presupuesto is not None:
             for _ in self._metricas:
                 self._presupuesto.registrar(self._tokens_por_metrica, 0)
@@ -414,6 +415,20 @@ class EvaluadorRagas:
                 f"{_num(r.answer_relevancy)} | {_num(r.context_precision)} | {estado} |"
             )
         return "\n".join(lineas)
+
+
+def _ejecutar(corutina: Coroutine[Any, Any, dict[str, float]]) -> dict[str, float]:
+    """Corre la corutina tanto desde un script como desde un notebook.
+
+    En un kernel de Jupyter ya hay un bucle de eventos en marcha y `asyncio.run` falla;
+    en ese caso la corutina corre en un hilo aparte con su propio bucle.
+    """
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(corutina)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ejecutor:
+        return ejecutor.submit(asyncio.run, corutina).result()
 
 
 def _num(valor: float | None) -> str:

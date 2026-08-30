@@ -18,6 +18,7 @@ from rag_minero.evaluacion import (
     CasoOro,
     EvaluadorRagas,
     GoldenSet,
+    MetricasCaso,
     PreguntasControl,
     contiene_referencia,
     precision_de_contexto,
@@ -258,5 +259,22 @@ def test_la_tabla_de_ragas_tiene_una_fila_por_caso() -> None:
         resultados = EvaluadorRagas(asistente, juez, juez, juez).evaluar(_golden_sintetico())
         tabla = EvaluadorRagas.tabla_markdown(resultados)
         assert tabla.count("\n") == 2 + 3 - 1 and "| cp03 |" in tabla and "0.50" in tabla
+    finally:
+        almacen.vaciar()
+
+
+def test_el_evaluador_funciona_dentro_de_un_bucle_de_eventos_en_marcha() -> None:
+    import asyncio
+
+    asistente, almacen = _asistente("Respuesta sin cifras.")
+    try:
+        juez = _JuezFalso(0.5)
+        evaluador = EvaluadorRagas(asistente, juez, juez, juez)
+
+        async def desde_un_kernel() -> list[MetricasCaso]:
+            return evaluador.evaluar(_golden_sintetico())
+
+        resultados = asyncio.run(desde_un_kernel())
+        assert [r.faithfulness for r in resultados] == [0.5, 0.5, 0.5]
     finally:
         almacen.vaciar()
