@@ -270,3 +270,22 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   pueden encontrar, porque son las pruebas mismas las que se escriben con los supuestos del
   autor. La revisión encontró tres cosas para corregir y dos para decidir; queda registro de
   todas, incluidas las que se midieron y se decidió no cambiar.
+
+- **La sobretemperatura se mide sobre un cero real.** La feature era `temp_motor_c / rpm_corona`
+  y al pedir sus unidades apareció el problema: el grado Celsius es una escala de intervalo con
+  cero arbitrario, así que el cociente cambia el orden de los registros si se mide en kelvin
+  —la correlación de rangos entre ambas versiones es 0.82— y deja de ser una magnitud física.
+  Consideré dejarla, porque el modelo igual encontraría la relación, pero elegí cambiarla por
+  `(temp_motor_c − 38) / rpm_corona`, medida sobre el incremento respecto de la temperatura
+  mínima observada, que actúa como proxy de ambiente. Gana en las dos cosas que importan: tiene
+  sentido dimensional y su asociación con la falla sube de 0.113 a 0.144. La referencia queda
+  como parámetro configurable.
+
+- **La tabla de salida se documenta en su propio archivo.** Consideré que bastara con los
+  docstrings de los transformadores, que ya explican cada feature, pero elegí escribir
+  `docs/tabla_resultado.md` con las treinta columnas una por una —unidad, interpretación, rango
+  observado y advertencias— porque los docstrings los lee quien abre el código y esta tabla la
+  va a leer quien reciba el resultado. Ahí quedan reunidas las quince advertencias que hoy
+  estaban dispersas entre el notebook, el diccionario y los docstrings: que `flag_imputed` marca
+  lo contrario de lo que sugiere su nombre, que `ton_rom_acum` no es un acumulado, que el umbral
+  térmico real es 88 °C, que `equipo_id` y `op_id` no admiten lectura causal, y las demás.
