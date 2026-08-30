@@ -185,3 +185,16 @@ def test_los_miles_con_coma_del_contexto_respaldan_la_cifra_sin_coma() -> None:
 def test_el_verificador_no_se_deja_enganar_por_un_contexto_vacio() -> None:
     verificacion = VerificadorDeHechos().verificar("Son 280 bar.", [])
     assert not verificacion.aprobada
+
+
+def test_las_citas_de_chunk_no_cuentan_como_cifras() -> None:
+    respuesta = "La presión máxima es 280 bar [MANUAL-ATLAS-COPCO-L8#manual#004] y no se opera sobre 260 bar [MANUAL-ATLAS-COPCO-L8#manual#004]."
+    hechos = extraer_hechos(respuesta)
+    assert "004" not in hechos and "280" in hechos and "260" in hechos
+    verificacion = VerificadorDeHechos().verificar(respuesta, ["Presión hidráulica máxima 280 bar. No operar >260 bar."])
+    assert verificacion.aprobada
+
+
+def test_un_codigo_dentro_de_una_cita_no_se_exige_en_el_contexto() -> None:
+    verificacion = VerificadorDeHechos().verificar("Detener [PET-PERF-007#procedimiento#022].", ["Detener."])
+    assert verificacion.aprobada and verificacion.sin_respaldo == ()

@@ -58,7 +58,13 @@ DOCUMENTOS: Final[tuple[str, ...]] = (
 
 @dataclass(frozen=True)
 class Configuracion:
-    """Parametros de la demo, leidos del entorno y validados antes de empezar."""
+    """Parametros de la demo, leidos del entorno y validados antes de empezar.
+
+    Los nombres de los modelos son configuracion y no codigo: el workspace de prueba tiene
+    los modelos propietarios apagados con un limite de tasa cero, asi que la demo corre con
+    `RAG_MODELO_GENERADOR` y `RAG_MODELO_JUEZ` abiertos y en produccion basta cambiar la
+    variable para volver a Claude Sonnet 5.
+    """
 
     directorio_pdf: Path
     almacen: TipoAlmacen = "local"
@@ -85,10 +91,16 @@ class Configuracion:
         if almacen not in ("local", "databricks"):
             raise ConfiguracionError("RAG_ALMACEN", "debe ser 'local' o 'databricks'")
         tokens = valores.get("RAG_TOKENS_MAXIMOS", "").strip()
+        por_defecto = cls(directorio_pdf=directorio)
         return cls(
             directorio_pdf=directorio,
             almacen="databricks" if almacen == "databricks" else "local",
             tokens_maximos=int(tokens) if tokens else 400_000,
+            modelo_generador=valores.get("RAG_MODELO_GENERADOR", "").strip()
+            or por_defecto.modelo_generador,
+            modelo_juez=valores.get("RAG_MODELO_JUEZ", "").strip() or por_defecto.modelo_juez,
+            modelo_embeddings=valores.get("RAG_MODELO_EMBEDDINGS", "").strip()
+            or por_defecto.modelo_embeddings,
             perfil=valores.get("DATABRICKS_CONFIG_PROFILE") or None,
         )
 

@@ -197,8 +197,11 @@ class Calibrador:
 
 # --- Verificador de hechos ---
 
+#: Las citas `[DOC#estrategia#022]` se quitan antes de extraer hechos: el 022 es un
+#: identificador de chunk, no una cifra que la respuesta afirme.
+PATRON_CITA: Final[re.Pattern[str]] = re.compile(r"\[[^\]]*#[^\]]*\]")
 PATRON_CIFRA: Final[re.Pattern[str]] = re.compile(
-    r"(?<![A-Za-z0-9-])(-?\d+(?:[.,]\d+)*)\s*"
+    r"(?<![A-Za-z0-9#/-])(-?\d+(?:[.,]\d+)*)\s*"
     r"(%|°C|bar|RPM|rpm|m/s²|m/s2|L/min|g/t|kW|kN|kg|mm|min|h\b|m\b|L\b|días|dias|USD|oz|ppm"
     r"|unidades|juegos|turnos|registros|metros|segundos|minutos|horas)?"
 )
@@ -220,6 +223,7 @@ def _normalizar_numero(numero: str) -> str:
 
 def extraer_hechos(texto: str) -> list[str]:
     """Cifras y codigos que el texto afirma, normalizados para compararlos."""
+    texto = PATRON_CITA.sub(" ", texto)
     hechos = [_normalizar_numero(n) for n, _ in PATRON_CIFRA.findall(texto)]
     hechos += PATRON_CODIGO.findall(texto)
     hechos += PATRON_FRENTE.findall(texto)

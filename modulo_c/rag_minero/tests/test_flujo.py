@@ -48,9 +48,14 @@ def test_la_configuracion_lee_almacen_y_tope(tmp_path: Path) -> None:
         RAG_ALMACEN="databricks",
         RAG_TOKENS_MAXIMOS="1234",
         DATABRICKS_CONFIG_PROFILE="perfil",
+        RAG_MODELO_GENERADOR="databricks-qwen3-next-80b-a3b-instruct",
+        RAG_MODELO_JUEZ="databricks-meta-llama-3-3-70b-instruct",
     )
     config = Configuracion.desde_entorno(entorno)
     assert (config.almacen, config.tokens_maximos, config.perfil) == ("databricks", 1234, "perfil")
+    assert config.modelo_generador == "databricks-qwen3-next-80b-a3b-instruct"
+    assert config.modelo_juez == "databricks-meta-llama-3-3-70b-instruct"
+    assert config.modelo_embeddings == "databricks-qwen3-embedding-0-6b"
 
 
 def test_un_almacen_desconocido_falla(tmp_path: Path) -> None:
