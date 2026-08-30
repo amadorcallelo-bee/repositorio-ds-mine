@@ -519,6 +519,102 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   el texto, falla la prueba. Es la regla de hacer cumplir por máquina lo que no quiero dejar
   encomendado a la memoria.
 
+## 2026-08-30 — Módulo C, Ejercicio C-2
+
+- **Género y patrón de consulta no compiten: operan en niveles distintos.** Yo sostenía que el
+  género del documento tiene un papel importante en el chunking; Claude proponía decidir por
+  cómo pregunta el usuario. Elegí unir las dos posturas en dos niveles —el género elige la
+  estrategia porque decide qué elementos existen, y el tipo de elemento fija la unidad de
+  recuperación porque es lo que decide cómo se pregunta— y exigí que la discusión se cerrara
+  con una ablación medida y no con un argumento: tres variantes de chunking contra el golden
+  set, precisión y recall de contexto, sin modelo juez.
+
+- **Una estrategia fuerte para las tablas partidas por página.** Noté que muchas tablas de los
+  PDF están partidas por el salto de página y pedí que eso tuviera una solución robusta y no
+  un parche. Quedó como fusión por continuidad —la página anterior termina en tabla, la
+  siguiente empieza en tabla en el margen superior, mismo número de columnas— con una prueba
+  de integración que fija el inventario de filas de cada documento.
+
+- **BM25 para los códigos.** Ya lo había pensado antes de que Claude lo propusiera: en mina se
+  pregunta por código y los embeddings densos no los encuentran. Recuperación híbrida en los
+  dos almacenes, con la misma fusión de rangos recíprocos que usa Databricks.
+
+- **Databricks, no Azure, por practicidad.** Azure AI Search es más completo para agentes, pero
+  la plataforma del C-1 es Databricks y ahí es donde despega este asistente. Vector store:
+  Mosaic AI Vector Search de Databricks, con Chroma más BM25 como respaldo local para las
+  pruebas y para quien no tenga workspace. Claude señaló que el enunciado lista almacenes
+  reproducibles en local y que Vector Search exige workspace; acepté las dos implementaciones
+  detrás del mismo contrato.
+
+- **LangChain como orquestación** y **credencial única vía Databricks** (modelo, embeddings e
+  índice con el mismo perfil de la CLI), por practicidad. Sonnet 5 como generador y juez, con
+  las corridas de prueba a la mitad; luego Haiku genera y Sonnet juzga, para quitar el sesgo
+  de autoevaluación.
+
+- **Dos diagramas en Eraser, uno por situación:** el flujo de una pregunta y la relación entre
+  los roles de la mina, el asistente, los documentos y su clasificación. PDF por variable de
+  entorno, como el CSV. Golden set redactado por Claude y validado por mí caso por caso: en
+  pet-01 mi validación trajo la intervención de primer nivel del manual, y la respuesta
+  esperada quedó cruzando el PET con el manual.
+
+- **Costos antes de cada recurso, con tope de 40 USD.** Pedí evaluar el costo antes de
+  cualquier modificación. Aprobé una sesión estimada en 9.59 USD, dominada por el endpoint de
+  Vector Search por hora y no por los tokens, y bajé el auto-stop del warehouse a un minuto
+  para que la consulta de facturación costara 0.28 USD y no 1.54.
+
+- **Modelos abiertos cuando el workspace apagó a Claude.** El workspace de prueba devolvió
+  «rate limit of 0» para todos los modelos propietarios, incluso después de pasar a plan
+  pagado, porque la cuenta sigue en el nivel de confianza de prueba. Consideré esperar la
+  reclasificación o usar la API de Anthropic directa con clave propia, pero elegí correr con
+  Qwen3-Next 80B como generador y Llama 3.3 70B como juez —los dos probados— porque no
+  bloquea la entrega y el modelo es una variable de configuración; si Claude se habilita
+  antes de entregar, se repite solo la corrida final.
+
+- **Cierre del C-2 con la corrida sobre Vector Search.** Cuatro corridas del notebook: las tres
+  primeras fallaron por el ciclo de vida del índice en Databricks —token OAuth vencido durante
+  la media hora que tarda en crearse, pipeline ocupado que rechaza sincronizar, y `asyncio.run`
+  dentro del kernel de Jupyter—, cada una con corrección y prueba de regresión. La cuarta cerró
+  completa: faithfulness 0.97, answer_relevancy 0.70, context_precision 0.80, diez de diez
+  respondidas, trece preguntas de control correctas, y el endpoint borrado por el propio
+  flujo. Acepté que el README leyera las métricas bajas donde lo son (pet-01, geo-02, man-01)
+  en vez de maquillarlas.
+
+- **DeepSeek V4 Flash como generador, en lugar de Haiku.** Pedí un modelo más potente que los
+  que corrieron. Claude probó todos los endpoints habilitados y me mostró que los propietarios
+  y varios abiertos grandes (Kimi K3, DeepSeek V4 Pro, GLM) comparten el bloqueo de la cuenta.
+  Entre los que responden, DeepSeek V4 Flash fue el único que detectó la contradicción entre
+  el PET y el manual, y las comparativas públicas lo ubican al nivel de Haiku 4.5 y por debajo
+  de Sonnet. Quise quedarme con Haiku, pero no existe como servicio en el workspace, así que
+  elegí DeepSeek V4 Flash como su equivalente, con Llama 3.3 70B de juez. La corrida final con
+  ese generador queda pendiente para la próxima sesión.
+
+- **Despliegue del asistente, después y como ítem aparte.** Pregunté qué haría falta para
+  desplegar el agente en Databricks sin sobreingeniería. Claude comparó cuatro vías y
+  recomendó una Databricks App que reutiliza el código tal cual; acepté dejarlo como opcional
+  fuera del enunciado, porque exige mantener vivo el endpoint de Vector Search.
+
+- **La corrida final con DeepSeek V4 Flash, con revisión adversarial y respuestas claras.**
+  De los cuatro pendientes que quedaron escritos al cierre de la sesión anterior, autoricé solo
+  el primero, la corrida final con DeepSeek V4 Flash como generador, y pedí que pasara por
+  revisión adversarial antes de darse por terminada, con una exigencia adicional: que las
+  respuestas del C-2 —las del asistente y las del README a las cinco preguntas del enunciado—
+  fueran muy claras. El merge a `main`, la lectura de la factura y la Databricks App siguen
+  esperando mi indicación.
+
+- **El C-2 se integra a `main` y la App queda descartada.** Con el A-2 ya integrado autoricé
+  el merge de `feature/c2-rag` a `main` con merge commit, la lectura de la factura real en
+  `system.billing.usage`, y descarté el despliegue opcional como Databricks App: está fuera
+  del enunciado y exige mantener vivo el endpoint de Vector Search. Pedí además una revisión
+  adversarial de cobertura: verificar contra el enunciado que el C-2 responde todo lo que se
+  pregunta. La factura solo refleja por ahora 0.73 USD (warehouse SQL); el serving y el
+  Vector Search de la sesión de la mañana siguen sin aparecer por el rezago de horas, así que
+  la cifra completa se anota cuando el sistema la publique.
+
+- **El Módulo C queda integrado también en el remoto.** Con el C-2 mergeado en `main` local,
+  pedí ajustar repositorio y documentación para que todo el Módulo C quedara integrado:
+  publicar `main` en GitHub, borrar la rama y el worktree del C-2 ya integrados, y corregir la
+  última línea del README que todavía decía que `modulo_c/` faltaba por crear. El Módulo B
+  sigue en sus ramas y su worktree, intacto.
 ## 2026-08-30 — Módulo B, Ejercicio B-1
 
 - **El Módulo B en una tercera terminal, con límites explícitos.** Con el A-2 cerrándose en

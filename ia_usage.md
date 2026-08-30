@@ -1559,6 +1559,243 @@ Privados. Procede
 
 95 pruebas, cobertura 99.81%, mypy estricto y ruff limpios. Ninguna cifra del documento se escribió a mano: todas salen de ejecutar `costos.py`, y la prueba falla si el documento y el modelo se desincronizan.
 
+## 2026-08-30 — Módulo C, Ejercicio C-2
+
+### Amador
+
+Continuemos con el C-2, así que léelo completo y compréndelo; nota que en el directorio de insumos están los tres archivos que indican en el .docx. Hazme una propuesta de cómo responder comenzando por la estructura de directorios y archivos (quiero que sea sencilla) y haz unas tablas comparativas entre os servicios para que la decisión para tomar una alternativa u otra sea objetiva. Debemos responder todo lo que preguntan en el C-2. Solo procede cuando explícitamente yo te lo indique
+
+### Claude
+
+(Ejecutó: lectura del enunciado y de los tres PDF; verificación del entorno —sin claves de API, sin Ollama, venv compartida sin librerías de RAG—; consulta de la API actual de RAGAS 0.4; cálculo del costo de una corrida de evaluación por proveedor.)
+
+Propuse la estructura de siete módulos, la lectura de cada documento —cómo está construido, cómo pregunta quien lo usa, cuál es la unidad de recuperación y qué rompe el troceo por tamaño fijo—, tres hallazgos transversales (en mina se pregunta por código, los documentos se referencian entre sí, el informe es CONFIDENCIAL) y tres tablas comparativas: vector store, proveedor de modelo y embeddings, y framework. Señalé que no había ninguna clave de API disponible y que RAGAS necesita un juez.
+
+### Amador
+
+1. Creo que el género del documento sí tiene un papel importante en la decisión del documento. Cómo sugieres que contrastemos ambas posturas? Podemos unirlas? 2. Muchas tablas en los docuentos están partidas por la separación de páginas, entonces debemos tener una estrategia fuerte ahí. 3. También había pensado en BM25 para los códigos, me alegra. 4. Me gusta la estructura, pero espera que definamos las otras cosas y la vuelves a proponer si es necesario un cambio; también quiero que le agregues un diagrama de flujo de usuario y otro de cómo se relacionan los usuarios que haremos en eraser.io a través del mcp. 5. Aunque Azure es más completo para agentes, la idea es despegar por practicidad este en Databricks; ajusta. 6. Usemos sonnet-5 y bajemos a la mitad las corridas de prueba. 7. Usemos langchain como framework de orquestación. | Usemos Mosaic AI Vector Search de databricks como vector store. Usemos mientras tnto .venv-rag . | Qué otras preguntas tienen?
+
+### Claude
+
+(Ejecutó: verificación de que la mayoría de las tablas de los tres PDF cruzan página; consulta de la disponibilidad de Vector Search en la edición gratuita de Databricks, de los modelos de embeddings multilingües y de los endpoints de Claude en Foundation Model APIs; cálculo del costo con Sonnet 5 y la mitad de corridas.)
+
+Propuse unir las dos posturas en dos niveles —el género elige la estrategia, el elemento fija la unidad— y cerrar la discusión con una ablación medida. Estrategia en tres capas para las tablas partidas. Señalé que Vector Search no corre en local y propuse dos implementaciones detrás de un contrato. Seis preguntas: workspace, credencial única, qué muestra el diagrama de usuarios, PDF en el repositorio o por variable, validación del golden set, y quién juzga.
+
+### Amador
+
+1. Sí tengo y el ID es "7474649439388207". 2. Por practicidad vamos con la opción de credencial única vía databricks. 3. Son dos diagramas, uno para cada situación. 4. Ruta por variable de entorno. 5. De acuerdo. 6. Haiku genera y sonnet juzga. | Para agilizar usemos Databricks CLI para que puedas manipular y configurar todo. Sé muy prudente con los costos y antes de hacer cualquier modificación o implementación evalúa los costos para saber que no nos vamos a pasar de los 40USD que nos dan de muestra gratuita
+
+### Claude
+
+(Ejecutó: instalación de la CLI de Databricks por Homebrew; consulta de tarifas oficiales de Vector Search y de Foundation Model APIs; modelo de costos de la sesión contra los 40 USD.)
+
+El endpoint de Vector Search es el riesgo: 0.28 USD por hora desde que existe un índice, olvidado una semana consume el presupuesto entero. Protocolo: todo contra Chroma primero, endpoint creado y borrado en la misma sesión, costo antes de cada recurso, tope de tokens en código. Pedí la URL del workspace para autenticar.
+
+### Amador
+
+(Corrió `databricks auth login` con el ID en vez de la URL, que se quedó colgado; luego con la URL correcta, y el perfil `amador-prueba` quedó guardado.)
+
+### Claude
+
+(Ejecutó: inventario del workspace en solo lectura: catálogos, endpoints de Vector Search, 27 endpoints de serving, warehouse y tablas de facturación visibles.)
+
+Dos hallazgos: no existe `databricks-claude-haiku-4-5` en el workspace, y verificar precios reales cuesta encender el warehouse; propuse bajar el auto-stop a un minuto. Pedí aprobar generador y juez, la consulta de precios y la creación del esquema.
+
+### Amador
+
+1. vamos con tu recomendación, esto es una prueba y lo importante es que seamos consciente de las limitaciones. 2. Hazlo. 3. Crealo
+
+### Claude
+
+(Ejecutó: auto-stop del warehouse a 1 minuto; creación del esquema `workspace.rag_minero`; consulta de `system.billing.list_prices` y `system.billing.usage`; verificación de que el warehouse se apagó; nota persistente con el perfil, los recursos y el protocolo de costos.)
+
+Serving confirmado a 0.07 USD por DBU en US West Oregon; la conversión token a DBU de Claude no está en la tabla de precios. Consumo acumulado del workspace: 0.0001 USD. Pregunté si integrar el C-1 a `main` antes de abrir el C-2.
+
+### Amador
+
+sigue mi regla. procede. haz revisión adversarial y atento con los costos
+
+### Claude
+
+(Ejecutó: revisión adversarial del C-1, que encontró siete cifras del documento calculadas fuera del modelo y una equivocada por redondeo —45,808 y no 45,816—, corregidas con pruebas y una verificación automática; integración del C-1 a `main` con merge commit, borrado de la rama y apertura de `feature/c2-rag`; creación de `.venv-rag` con las dependencias; redacción del golden set y las preguntas de control; lector de PDF, chunking, guardrails, almacén híbrido, asistente, evaluación y flujo, cada uno con sus pruebas; 149 pruebas, cobertura 94%, mypy estricto y ruff limpios; dos diagramas en Eraser, escritos a mano en DSL; corrida de los pasos gratuitos sobre los PDF reales.)
+
+Calibración 10/10 y 10/10; ablación con la propuesta por delante de las dos variantes de control. Presenté el golden set para validar y el costo de la sesión en Databricks: 9.59 USD estimados.
+
+### Amador
+
+2. apruebo ese costo. | Ahora las respuestas del golde-set, nota que las estoy copiando y pegando o resumiendo, pero es para que veas que sí deben estar correctas: [validación caso por caso de las diez respuestas]
+
+### Claude
+
+(Ejecutó: ajuste de pet-01 con la intervención del manual que trajo la validación; prueba de humo con embeddings, generación y juez de RAGAS.)
+
+Los embeddings funcionan; todos los modelos propietarios devuelven 403 «rate limit of 0». Probé los abiertos: Qwen3-Next 80B genera bien en español y Llama 3.3 70B funciona como juez; Qwen3.5 122B y gpt-oss devuelven bloques de razonamiento. Presenté costos con modelos abiertos y con la API de Anthropic.
+
+### Amador
+
+Acabo de pagar databricks premium, entonces reintenta
+
+### Claude
+
+(Ejecutó: reintento; consulta de la documentación y del foro de Databricks sobre el error.)
+
+Sigue bloqueado: es una restricción de nivel de cuenta (`TRIAL_VERIFIED`), no del plan; se corrige con la reclasificación de Databricks o un ticket a soporte.
+
+### Amador
+
+Vuelve a intentar
+
+### Claude
+
+(Ejecutó: reintento, mismo 403.)
+
+### Amador
+
+Corre con los modelos abiertos
+
+### Claude
+
+(Ejecutó: modelos configurables por variable de entorno; corrida de prueba local completa, que descubrió que el verificador leía el número de las citas de chunk como cifra sin respaldo y bloqueaba las diez respuestas; corrección con prueba de regresión; segunda corrida de prueba: faithfulness 1.00, answer relevancy 0.65, context precision 0.86, diez de diez respondidas, trece preguntas de control correctas; el cliente de Vector Search no lee el perfil OAuth de la CLI y recibió el token del SDK; creación del endpoint y del índice Delta Sync; generación del notebook de la demo; redacción del README del C-2 con marcadores para las cifras finales.)
+
+### Amador
+
+Cuales son los endpoint para consultarlos, y dame una tabla que responda cada una de las preguntas del c-2
+
+### Claude
+
+Tabla de recursos del workspace con su consulta por CLI, y tabla de las cinco preguntas del C-2 con respuesta, ubicación y medición.
+
+### Amador
+
+Si quisieramos "Desplegar Asistente como endpoint de Model Serving con MLflow (modelo tipo ChatAgent) y abrirlo desde el Playground o desde una app de Databricks. [...]", qué tendríamos que hacer?, cuánto nos demora? ya tenemos la estructura, no debería ser difícil
+
+### Claude
+
+Cinco pasos (envoltorio `ChatAgent`, vocabulario como artefacto, registro en MLflow con recursos declarados, `agents.deploy`, app opcional), dos a tres horas, y la consecuencia de costo: un asistente desplegado exige mantener el endpoint de Vector Search vivo. Recomendé cerrar primero la corrida aprobada y tratar el despliegue como ítem aparte.
+
+### Claude
+
+(Ejecutó: cuatro corridas del notebook contra Vector Search. La primera falló por token OAuth vencido durante la creación del índice; la segunda porque el pipeline del índice rechazó sincronizar mientras preparaba recursos; la tercera por `asyncio.run` dentro del kernel de Jupyter. Cada fallo quedó corregido con prueba de regresión y commit. La cuarta cerró completa; el `finally` borró índice y endpoint; el README se rellenó desde `resultados.json`; lectura de `system.billing.usage`, que todavía no refleja la sesión por el rezago de horas de la tabla; 155 pruebas, cobertura 93%, mypy estricto y ruff limpios; la suite del Módulo A y del C-1 sigue en 99.82% con la venv compartida, con las pruebas del RAG saltadas allí porque no tiene sus librerías.)
+
+Resultados finales sobre Vector Search: faithfulness 0.975, answer_relevancy 0.705, context_precision 0.804, 10/10 respondidas; guardrails 10/10 rechazos fuera de dominio y 3/3 negativas honestas sin cifras; ablación con la propuesta en P 0.84 / R 1.00 frente a 0.71 y 0.66 de los controles.
+
+### Amador
+
+consulta si está habilitado ya el sonnet
+
+### Claude
+
+(Ejecutó: reintento contra Sonnet 5, Opus 5 y Opus 4.8: mismo 403.)
+
+### Amador
+
+No hay otra manera de hacerlo? lo puedo chequear desde la UI de databricks?
+
+### Claude
+
+Indiqué los tres lugares de la UI (partner-powered AI en el account console, el endpoint en Serving, la suscripción) y la alternativa de un model provider service de Anthropic con clave propia.
+
+### Amador
+
+1. Está encendida. 2. Mira lo que veo, creo que no está [captura: Serving vacío, aviso de migración a Unity AI Gateway; los modelos aparecen en system.ai] 3. Ya está pagada.
+
+### Claude
+
+(Ejecutó: exploración de Unity AI Gateway por CLI y API; consulta de la documentación de la ruta nueva `/ai-gateway/mlflow/v1`; prueba de `system.ai.claude-sonnet-5` por esa ruta.)
+
+Foundation model serving migró a Unity AI Gateway, pero por la ruta nueva el bloqueo es el mismo «rate limit of 0»: es de nivel de cuenta y solo lo levanta soporte.
+
+### Amador
+
+No hay otra manera de hacerlo? no es posible que no exista una manera de ua teniendo toda la infrestructura montada de desplegar un agente en databricks, evalúa bien y no uses sobreingeniería
+
+### Claude
+
+Separé las dos cosas: Sonnet no depende de nuestra infraestructura; desplegar el agente sí es posible hoy. Comparé Playground con herramienta, Databricks App, ChatAgent en Model Serving y Agent Bricks, y recomendé la App.
+
+### Amador
+
+con qué otros modelos podemos hacer el despliegue? quiero modelos un poco más potentes que los que tenemos para mejorar la calidad de las respuestas
+
+### Claude
+
+(Ejecutó: prueba de los diez endpoints no probados; comparación de DeepSeek V4 Flash, gpt-oss-120B, Llama 4 Maverick, Qwen 3.5 122B y Qwen3-Next sobre la pregunta cruzada con el prompt real; lectura de la tabla de precios con las columnas alineadas, que corrigió a la baja mis estimados anteriores de tokens.)
+
+Recomendé DeepSeek V4 Flash como generador: el más potente de los habilitados, el más barato y el único que marcó la discrepancia entre documentos.
+
+### Amador
+
+DeepSeek V4 Flash es similar a cual de antrhopic en potencia?
+
+### Claude
+
+(Ejecutó: búsqueda de comparativas publicadas.) Nivel de Haiku 4.5, por debajo de Sonnet 4.6; Sonnet 5 es otro escalón.
+
+### Amador
+
+quedemos con haiku entonces. en qué estado está entonces nuestro c-2 y qué le hace falta?
+
+### Claude
+
+(Ejecutó: prueba de `system.ai.claude-haiku-4-5`, que no existe en el workspace.) Estado del C-2 completo y lista de pendientes: corrida final con DeepSeek V4 Flash, integración a main, lectura de la factura, despliegue opcional.
+
+### Amador
+
+Actualiza la documentación porque tenemos la ventana de contexto saturada y deja claros los pendientes porque una vez hagas esto que te dije voy a reiniciar la ventana de contexto
+
+### Claude
+
+(Ejecutó: sección «Pendientes al 2026-08-30» en el README del C-2, entradas del diario y de este registro, nota persistente con el estado y los pendientes, commit.)
+
+### Amador
+
+cuáles son nuestros pendientes para cerrar este c-2? dime uno a uno pero sé muy conciso porque tienes la mala práctica de usar mucho texto en tus respuestas. solo procede con mi autorización explícita
+
+### Claude
+
+(Ejecutó: lectura de las notas persistentes, del worktree `feature/c2-rag` y de la sección «Pendientes al 2026-08-30» del README del C-2.) Listé los cuatro pendientes: corrida final con DeepSeek V4 Flash, merge a `main` cuando el A-2 esté commiteado, lectura de la factura real, y la Databricks App opcional.
+
+### Amador
+
+procede con 1 y ha revisión adversorial. garantiza que sean muy claras las respuestas para c-2
+
+### Claude
+
+(Ejecutó: verificación de que el workspace no tiene endpoint de Vector Search ni tablas en `workspace.rag_minero`; dos sondas a `databricks-deepseek-v4-flash-0731` vía `ChatDatabricks` 0.20.0 con el prompt real del asistente: el contenido llega como cadena sin bloques de razonamiento, la pregunta cruzada consume 439 tokens de salida para cuatro frases visibles, y con un tope de 200 tokens la respuesta llega vacía con `finish_reason="length"`.)
+
+Cambios en `asistente.py`: tope de salida `SALIDA_MAXIMA = 1500` compartido entre el modelo y el presupuesto; `_texto_de` extrae solo bloques `text` y reconoce la lista de bloques serializada en JSON sin confundirla con una respuesta que empieza por una cita; una respuesta vacía se declara como fallo (`bloqueada`, motivo «respuesta vacia») en lugar de contarse como respondida; una salida cortada por el tope se entrega pero con motivo «salida truncada». `flujo.py` pasa el tope a los dos lados; docstring de `evaluacion.py` corregido (juez y generador son configuración y de familias distintas). Once pruebas nuevas. 168 pruebas pasan, cobertura 85.6%, mypy estricto y ruff limpios; las dos pruebas de integración sobre los PDF reales pasan. Celda de introducción del notebook actualizada a DeepSeek V4 Flash. Corrida de `rag_demo.ipynb` lanzada con `RAG_ALMACEN=databricks`, `RAG_VS_ENDPOINT=rag-minero-vs`, `RAG_MODELO_GENERADOR=databricks-deepseek-v4-flash-0731`, `RAG_MODELO_JUEZ=databricks-meta-llama-3-3-70b-instruct`, tope de 600,000 tokens.
+
+### Amador
+
+avísame cuando termine y muéstrame las respuestas del golden set
+
+### Claude
+
+(Ejecutó: espera del cierre del notebook en segundo plano.)
+
+### Amador
+
+Ya podemos hacer el merge porque A-2 ya está commiteado, puedes proceder también entonces con 3 y con 4 no. Haz revisión adversorial para garantizar que estamos respondiendo todo lo que se nos pregunta en C-2
+
+### Claude
+
+(Ejecutó: consulta de `system.billing.usage` con el script de facturación de la sesión anterior: 0.7282 USD visibles a precio de lista, dominados por el warehouse SQL; el serving y el Vector Search de la sesión de la mañana aún no aparecen por el rezago. Extracción de la sección C-2 del enunciado para la revisión de cobertura.)
+
+### Claude
+
+(Ejecutó: cierre de la corrida final de `rag_demo.ipynb` con DeepSeek V4 Flash, 30 minutos, exit 0, endpoint `rag-minero-vs` creado y borrado por el propio flujo. Resultados: faithfulness 1.00, answer_relevancy 0.62, context_precision 0.80, 10/10 respondidas, 13/13 preguntas de control correctas —10 rechazadas por la puerta, 3 negativas honestas—, cruzada-01 señala la discrepancia PET/manual, 291,849 tokens en 43 llamadas. README rellenado desde `resultados/resultados.json` y reescritos los párrafos de modelos, lectura de métricas y cierre de pendientes. 168 pruebas, cobertura 85.6%, mypy estricto y ruff limpios.)
+
+### Claude
+
+(Ejecutó: merge `--no-ff` de `feature/c2-rag` a `main`; conflicto único en `pyproject.toml`, resuelto con la unión de los overrides de mypy; los demás archivos se auto-fusionaron y se verificaron. Consolidación del entorno: las dependencias del C-2, fijadas desde el `pip freeze` de `.venv-rag`, pasaron al `requirements.txt` de la raíz —pandas 2.3.3, numpy 2.4.6 y pydantic 2.13.5 quedaron intactos—, el `requirements.txt` del módulo se eliminó, el README del módulo apunta al entorno único y `rag_minero` entró a la puerta de cobertura de la raíz. Verificación en el entorno consolidado: 485 pruebas pasan, 3 de integración se saltan sin el dataset, cobertura sobre el umbral, mypy estricto y ruff limpios.)
+
+### Amador
+
+Ajusta el tema de los repositorios para y la documentación para que todo C esté integrado
+
+### Claude
+
+(Ejecutó: verificación de que el worktree del C-2 está limpio y el de B tiene trabajo sin commitear que no se toca; corrección de la línea del README que decía que `modulo_c/` faltaba por crear; entradas de cierre en el diario y en este registro, integradas por rama corta con merge commit; push de `main` a origin; eliminación del worktree `repositorio-ds-mine-c1` y de la rama `feature/c2-rag`, ya integrada.)
 ## 2026-08-30 — Módulo B, Ejercicio B-1
 
 ### Amador

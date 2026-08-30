@@ -7,12 +7,18 @@
 # dotfiles sueltos en la raiz.
 
 [tool.pytest.ini_options]
-testpaths = ["modulo_a/aurum_pipeline/tests", "modulo_b/umlc_lakehouse/tests", "modulo_c/tests"]
+testpaths = [
+    "modulo_a/aurum_pipeline/tests",
+    "modulo_b/umlc_lakehouse/tests",
+    "modulo_c/tests",
+    "modulo_c/rag_minero/tests",
+]
 pythonpath = ["modulo_a", "modulo_b", "modulo_c"]
 addopts = [
     "--cov=aurum_pipeline",
     "--cov=umlc_lakehouse",
     "--cov=costos",
+    "--cov=rag_minero",
     "--cov-report=term-missing",
     "--cov-fail-under=80",
     "-q",
@@ -47,6 +53,13 @@ module = [
     "sklearn.*",
     "mlflow.*",
     "scipy.*",
+    "pdfplumber.*",
+    "chromadb.*",
+    "rank_bm25.*",
+    "databricks.*",
+    "databricks_langchain.*",
+    "ragas.*",
+    "openai.*",
     "delta.*",
 ]
 ignore_missing_imports = true
@@ -74,7 +87,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"*/tests/*" = ["D100", "D103", "D104", "ANN201"]
+"*/tests/*" = ["D100", "D103", "D104", "ANN201", "E501"]
 # El notebook es exploratorio y sus celdas se leen en pantalla completa; el resto de las
 # reglas si aplica, para que no se cuele codigo muerto ni importaciones sin usar.
 "*.ipynb" = ["E501"]
