@@ -706,3 +706,71 @@ Cinco pasos (envoltorio `ChatAgent`, vocabulario como artefacto, registro en MLf
 (Ejecutó: cuatro corridas del notebook contra Vector Search. La primera falló por token OAuth vencido durante la creación del índice; la segunda porque el pipeline del índice rechazó sincronizar mientras preparaba recursos; la tercera por `asyncio.run` dentro del kernel de Jupyter. Cada fallo quedó corregido con prueba de regresión y commit. La cuarta cerró completa; el `finally` borró índice y endpoint; el README se rellenó desde `resultados.json`; lectura de `system.billing.usage`, que todavía no refleja la sesión por el rezago de horas de la tabla; 155 pruebas, cobertura 93%, mypy estricto y ruff limpios; la suite del Módulo A y del C-1 sigue en 99.82% con la venv compartida, con las pruebas del RAG saltadas allí porque no tiene sus librerías.)
 
 Resultados finales sobre Vector Search: faithfulness 0.975, answer_relevancy 0.705, context_precision 0.804, 10/10 respondidas; guardrails 10/10 rechazos fuera de dominio y 3/3 negativas honestas sin cifras; ablación con la propuesta en P 0.84 / R 1.00 frente a 0.71 y 0.66 de los controles.
+
+### Amador
+
+consulta si está habilitado ya el sonnet
+
+### Claude
+
+(Ejecutó: reintento contra Sonnet 5, Opus 5 y Opus 4.8: mismo 403.)
+
+### Amador
+
+No hay otra manera de hacerlo? lo puedo chequear desde la UI de databricks?
+
+### Claude
+
+Indiqué los tres lugares de la UI (partner-powered AI en el account console, el endpoint en Serving, la suscripción) y la alternativa de un model provider service de Anthropic con clave propia.
+
+### Amador
+
+1. Está encendida. 2. Mira lo que veo, creo que no está [captura: Serving vacío, aviso de migración a Unity AI Gateway; los modelos aparecen en system.ai] 3. Ya está pagada.
+
+### Claude
+
+(Ejecutó: exploración de Unity AI Gateway por CLI y API; consulta de la documentación de la ruta nueva `/ai-gateway/mlflow/v1`; prueba de `system.ai.claude-sonnet-5` por esa ruta.)
+
+Foundation model serving migró a Unity AI Gateway, pero por la ruta nueva el bloqueo es el mismo «rate limit of 0»: es de nivel de cuenta y solo lo levanta soporte.
+
+### Amador
+
+No hay otra manera de hacerlo? no es posible que no exista una manera de ua teniendo toda la infrestructura montada de desplegar un agente en databricks, evalúa bien y no uses sobreingeniería
+
+### Claude
+
+Separé las dos cosas: Sonnet no depende de nuestra infraestructura; desplegar el agente sí es posible hoy. Comparé Playground con herramienta, Databricks App, ChatAgent en Model Serving y Agent Bricks, y recomendé la App.
+
+### Amador
+
+con qué otros modelos podemos hacer el despliegue? quiero modelos un poco más potentes que los que tenemos para mejorar la calidad de las respuestas
+
+### Claude
+
+(Ejecutó: prueba de los diez endpoints no probados; comparación de DeepSeek V4 Flash, gpt-oss-120B, Llama 4 Maverick, Qwen 3.5 122B y Qwen3-Next sobre la pregunta cruzada con el prompt real; lectura de la tabla de precios con las columnas alineadas, que corrigió a la baja mis estimados anteriores de tokens.)
+
+Recomendé DeepSeek V4 Flash como generador: el más potente de los habilitados, el más barato y el único que marcó la discrepancia entre documentos.
+
+### Amador
+
+DeepSeek V4 Flash es similar a cual de antrhopic en potencia?
+
+### Claude
+
+(Ejecutó: búsqueda de comparativas publicadas.) Nivel de Haiku 4.5, por debajo de Sonnet 4.6; Sonnet 5 es otro escalón.
+
+### Amador
+
+quedemos con haiku entonces. en qué estado está entonces nuestro c-2 y qué le hace falta?
+
+### Claude
+
+(Ejecutó: prueba de `system.ai.claude-haiku-4-5`, que no existe en el workspace.) Estado del C-2 completo y lista de pendientes: corrida final con DeepSeek V4 Flash, integración a main, lectura de la factura, despliegue opcional.
+
+### Amador
+
+Actualiza la documentación porque tenemos la ventana de contexto saturada y deja claros los pendientes porque una vez hagas esto que te dije voy a reiniciar la ventana de contexto
+
+### Claude
+
+(Ejecutó: sección «Pendientes al 2026-08-30» en el README del C-2, entradas del diario y de este registro, nota persistente con el estado y los pendientes, commit.)

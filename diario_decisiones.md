@@ -416,3 +416,17 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   respondidas, trece preguntas de control correctas, y el endpoint borrado por el propio
   flujo. Acepté que el README leyera las métricas bajas donde lo son (pet-01, geo-02, man-01)
   en vez de maquillarlas.
+
+- **DeepSeek V4 Flash como generador, en lugar de Haiku.** Pedí un modelo más potente que los
+  que corrieron. Claude probó todos los endpoints habilitados y me mostró que los propietarios
+  y varios abiertos grandes (Kimi K3, DeepSeek V4 Pro, GLM) comparten el bloqueo de la cuenta.
+  Entre los que responden, DeepSeek V4 Flash fue el único que detectó la contradicción entre
+  el PET y el manual, y las comparativas públicas lo ubican al nivel de Haiku 4.5 y por debajo
+  de Sonnet. Quise quedarme con Haiku, pero no existe como servicio en el workspace, así que
+  elegí DeepSeek V4 Flash como su equivalente, con Llama 3.3 70B de juez. La corrida final con
+  ese generador queda pendiente para la próxima sesión.
+
+- **Despliegue del asistente, después y como ítem aparte.** Pregunté qué haría falta para
+  desplegar el agente en Databricks sin sobreingeniería. Claude comparó cuatro vías y
+  recomendó una Databricks App que reutiliza el código tal cual; acepté dejarlo como opcional
+  fuera del enunciado, porque exige mantener vivo el endpoint de Vector Search.

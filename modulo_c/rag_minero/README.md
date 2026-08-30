@@ -242,6 +242,29 @@ Lo que cambia en la indexación, en orden de importancia:
 
 287,872 tokens contados por el presupuesto en 43 llamadas (las del juez se registran por su estimación conservadora de 9,000 tokens cada una). El endpoint de Vector Search se creó y se borró en la misma sesión; el consumo real en dólares se lee de `system.billing.usage` y se reporta en el diario de decisiones.
 
+## Pendientes al 2026-08-30
+
+1. **Corrida final con DeepSeek V4 Flash como generador** (`RAG_MODELO_GENERADOR=databricks-deepseek-v4-flash-0731`),
+   Llama 3.3 70B sigue de juez. Es el equivalente a Haiku 4.5 entre los modelos habilitados en el
+   workspace y el único que, en la prueba, señaló la discrepancia entre el PET y el manual sobre
+   el centinela `-1`. Exige dos ajustes con prueba en `asistente.py`: subir `salida_maxima` a unos
+   1,500 tokens porque razona antes de responder, y quedarse con los bloques `text` de su salida,
+   que llega con bloques `reasoning` delante (como lista de dicts o como cadena JSON). Luego:
+   recrear endpoint e índice (media hora), reejecutar `rag_demo.ipynb` y rellenar este README con
+   `resultados/resultados.json`. Costo estimado: menos de 0.50 USD en tokens y ~1 USD de endpoint.
+2. **Integrar `feature/c2-rag` a `main`** con merge commit cuando el A-2 esté commiteado;
+   conflictos de agregado esperables en `README.md`, `diario_decisiones.md`, `ia_usage.md` y
+   `pyproject.toml`, y consolidar `requirements.txt` con `modulo_c/rag_minero/requirements.txt`.
+3. **Leer la factura real** en `system.billing.usage` cuando refleje la sesión (rezago de horas) y
+   anotarla en el diario; el estimado de la sesión es 2.28 USD (peor caso con cola del endpoint,
+   9.00 USD).
+4. Opcional, fuera del enunciado: desplegar el asistente como Databricks App (~1.5 h, exige el
+   endpoint de Vector Search vivo a 0.28 USD/h mientras exista).
+
+Claude Sonnet 5 y Haiku 4.5 no están disponibles en el workspace: Sonnet devuelve «rate limit of
+0» (restricción de nivel de cuenta que solo levanta soporte de Databricks) y Haiku no existe
+como servicio. Cuando se habiliten, son dos variables de entorno.
+
 ## Límites que se declaran
 
 - `answer_relevancy` depende de embeddings y de un juez que genera preguntas en español; con
