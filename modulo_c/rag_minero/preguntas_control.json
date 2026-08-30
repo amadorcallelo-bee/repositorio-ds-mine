@@ -1,0 +1,20 @@
+{
+  "descripcion": "Preguntas de control de los guardrails. Las de fuera de dominio deben rechazarse antes de recuperar nada. Las sin respaldo documental son del dominio minero pero no tienen respuesta en los tres documentos: el asistente debe decir que no está en la documentación y el verificador de hechos debe bloquear cualquier cifra inventada.",
+  "fuera_de_dominio": [
+    "¿Cómo preparo una paella valenciana para seis personas?",
+    "¿Quién ganó la Copa Libertadores de 2023?",
+    "Escríbeme una función en Python que ordene una lista de diccionarios por una clave.",
+    "¿Cuál es la capital de Australia?",
+    "Recomiéndame una serie de televisión para el fin de semana.",
+    "¿Qué síntomas tiene la gripe y cómo se trata en casa?",
+    "Redacta un correo para pedir vacaciones a mi jefe.",
+    "¿Cuánto cuesta un vuelo de Lima a Madrid en diciembre?",
+    "Explícame la teoría de la relatividad general.",
+    "¿Qué acciones debo comprar este año para invertir?"
+  ],
+  "sin_respaldo_documental": [
+    "¿Cuál es la presión hidráulica máxima de la perforadora Sandvik DL432?",
+    "¿Cuánto pesa la Sandvik DL432 y qué capacidad de rampa exige?",
+    "¿Cuál fue la ley media del Sector Rampa-Norte en el tercer trimestre de 2024?"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "descripcion": "Golden set del asistente RAG: diez preguntas con la respuesta esperada y los pasajes del documento que la sostienen. Tres por documento y una cruzada. Los pasajes de referencia son citas literales del PDF, independientes de la estrategia de chunking, para que sirvan en la ablacion.",
+  "casos": [
+    {
+      "id": "pet-01",
+      "documento": "PET-PERF-007",
+      "tipo_pregunta": "condicion-accion",
+      "pregunta": "¿Qué debe hacer el operador si durante la perforación la presión hidráulica cae por debajo de 140 bar?",
+      "respuesta_esperada": "Detener el equipo de inmediato y reportar el código H-HIDRA-02 al Supervisor de Turno. No debe reiniciar sin autorización. Es el criterio de parada inmediata CP-03 del PET-PERF-007.",
+      "contextos_referencia": [
+        "CP-03 Pérdida de presión hidráulica <140 bar durante operación Detener. Reportar H-HIDRA-02. No reiniciar sin autorización."
+      ]
+    },
+    {
+      "id": "pet-02",
+      "documento": "PET-PERF-007",
+      "tipo_pregunta": "rango-y-accion",
+      "pregunta": "¿Cuál es el valor aceptable de vibración en ralentí en el chequeo pre-turno y qué se hace si se supera?",
+      "respuesta_esperada": "En el chequeo pre-turno PT-06 la vibración en ralentí debe ser menor de 3.5 m/s² RMS. Si supera 5 m/s² en ralentí no se inicia el equipo y se solicita inspección mecánica.",
+      "contextos_referencia": [
+        "PT-06 Vibraciones en ralentí <3.5 m/s² RMS Si >5 m/s² en ralentí: no iniciar. Solicitar inspección mecánica."
+      ]
+    },
+    {
+      "id": "pet-03",
+      "documento": "PET-PERF-007",
+      "tipo_pregunta": "paso-de-procedimiento",
+      "pregunta": "¿A qué RPM se enciende el motor en el inicio controlado y cuánto tiempo de calentamiento hay que esperar antes de extender el brazo?",
+      "respuesta_esperada": "El Paso 2 indica encender el motor en modo ralentí a 800 RPM, esperar 3 minutos de calentamiento y verificar que la presión hidráulica suba al rango operacional de 180 a 240 bar antes de extender el brazo. Se registra en OPUS la hora de inicio, equipo_id, frente_id y op_id.",
+      "contextos_referencia": [
+        "Paso 2 — Inicio controlado Encender el motor en modo ralentí (800 RPM). Esperar 3 minutos de calentamiento. Verificar que la presión hidráulica suba a rango operacional (180–240 bar) antes de extender el brazo."
+      ]
+    },
+    {
+      "id": "geo-01",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "tipo_pregunta": "comparacion-en-tabla",
+      "pregunta": "¿Qué frente del Sector Veta Sur tuvo la mayor ley media en el tercer trimestre de 2024 y cuál fue esa ley?",
+      "respuesta_esperada": "El frente FR-S2-03, con una ley media de 9.21 g/t Au sobre 231 muestras. Es el frente más productivo del sector, cuya ley ponderada total fue 8.14 g/t.",
+      "contextos_referencia": [
+        "FR-S2-03 231 9.21 2.10 19.85 SUL 18,600",
+        "El frente FR-S2-03 continúa siendo el más productivo con ley promedio de 9.21 g/t"
+      ]
+    },
+    {
+      "id": "geo-02",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "tipo_pregunta": "dato-en-nota",
+      "pregunta": "¿Qué cut-off se aplica para la estimación de reservas en Veta Sur y con qué precio del oro se calculó?",
+      "respuesta_esperada": "Se aplica un cut-off económico de 2.5 g/t Au, basado en un precio del oro de USD 2,280 por onza y los costos operativos de la UMLC. Las leyes de la tabla de muestreo son valores brutos de laboratorio sin cut-off.",
+      "contextos_referencia": [
+        "Para estimación de reservas se aplica cut-off económico de 2.5 g/t Au basado en parámetros actuales de precio (Au = USD 2,280/oz) y costos operativos UMLC."
+      ]
+    },
+    {
+      "id": "geo-03",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "tipo_pregunta": "referencia-cruzada-entre-secciones",
+      "pregunta": "¿Por qué se recomienda reducir la malla de perforación en el frente FR-S2-03 y a qué dimensiones?",
+      "respuesta_esperada": "Porque en el tramo 320–380 m del FR-S2-03 se observa una bifurcación estructural (horse) que reduce la potencia principal y genera una veta secundaria de unos 0.6 m con ley promedio de 11.3 g/t. La recomendación R-01 es reducir la malla de 2.0×2.0 m a 1.5×1.5 m en los próximos 60 metros de avance para caracterizarla, con un costo estimado de 12 turnos adicionales de perforación.",
+      "contextos_referencia": [
+        "En el tramo 320–380 m del FR-S2-03 se observa una bifurcación estructural (horse) que reduce la potencia principal pero genera una veta secundaria de ~0.6 m con ley promedio de 11.3 g/t.",
+        "R-01 Malla de perforación FR-S2-03 tramo 320–380 m Reducir malla de 2.0×2.0 m a 1.5×1.5 m en los próximos 60 metros de avance para caracterizar correctamente la bifurcación estructural (horse). Costo estimado: 12 turnos adicionales de perforación."
+      ]
+    },
+    {
+      "id": "man-01",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "tipo_pregunta": "especificacion",
+      "pregunta": "¿Cuál es la presión hidráulica máxima de la perforadora Atlas Copco L8 y a partir de qué valor no debe operarse?",
+      "respuesta_esperada": "La presión hidráulica máxima es 280 bar, valor al que se activa la válvula de seguridad. La observación UMLC indica no operar por encima de 260 bar. La presión nominal es 210 bar y el rango operacional UMLC es 180 a 240 bar.",
+      "contextos_referencia": [
+        "Presión hidráulica máxima 280 bar Activación válvula seguridad. No operar >260 bar."
+      ]
+    },
+    {
+      "id": "man-02",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "tipo_pregunta": "codigo-de-repuesto",
+      "pregunta": "¿Cuál es el stock mínimo en UMLC y el tiempo de entrega de la bomba hidráulica principal AC-L8-BP-2241?",
+      "respuesta_esperada": "Stock mínimo de 1 unidad (bomba hidráulica principal refaccionada, sistema HP), proveedor Atlas Copco Lima, tiempo de entrega de 15 días.",
+      "contextos_referencia": [
+        "AC-L8-BP-2241 Bomba hidráulica principal (refaccionada) Sistema HP 1 unidad Atlas Copco Lima 15 días"
+      ]
+    },
+    {
+      "id": "man-03",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "tipo_pregunta": "diagnostico-por-codigo",
+      "pregunta": "Ante el código de falla H-HIDRA-05, ¿cuál es la causa probable, qué intervención de primer nivel corresponde y requiere especialista?",
+      "respuesta_esperada": "H-HIDRA-05 es que la presión no sube al rango operacional tras 5 minutos de calentamiento. La causa probable es una válvula de alivio descalibrada o una bomba con desgaste. La intervención de primer nivel es verificar la presión con manómetro portátil en el punto P-TEST-01, y siempre requiere especialista.",
+      "contextos_referencia": [
+        "H-HIDRA-05 Presión no sube a rango operacional tras 5 min calentamiento Válvula de alivio descalibrada o bomba con desgaste Verificar presión con manómetro portátil en punto P-TEST-01 Sí siempre"
+      ]
+    },
+    {
+      "id": "cruzada-01",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "tipo_pregunta": "cruzada-entre-documentos",
+      "pregunta": "¿Qué significa que OPUS registre ley_au_gpT = -1 y qué código de falla debe registrar el operador si persiste?",
+      "respuesta_esperada": "Es un valor centinela: la sonda XRF inline SX-01 perdió comunicación con el módulo OPUS-TELEM-v2, por interferencia electromagnética o fallo del cable de fibra óptica. No indica ley cero ni mineral estéril. La operación no se interrumpe por este motivo. El operador debe registrar falla_cod = E-ELEC-04 si persiste: el manual dice más de 2 registros consecutivos y el PET dice más de 2 turnos, y los dos documentos difieren en ese umbral.",
+      "contextos_referencia": [
+        "ATENCIÓN: si la sonda XRF no responde, el sistema registrará ley_au_gpT = -1. No interrumpir la operación por este motivo; registrar falla_cod = E-ELEC-04 si persiste más de 2 turnos.",
+        "En estos casos, el sistema OPUS registra automáticamente ley_au_gpT = -1 (valor centinela). Este valor NO indica ley cero ni debe interpretarse como medición de mineral estéril. El operador debe registrar falla_cod = E-ELEC-04 si la pérdida persiste más de 2 registros consecutivos."
+      ]
+    }
+  ]
+}

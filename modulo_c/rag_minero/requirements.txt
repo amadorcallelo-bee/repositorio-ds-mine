@@ -1,0 +1,24 @@
+# Entorno del Ejercicio C-2 (.venv-rag), separado del Modulo A mientras el A-2 se ejecuta.
+# Se consolida en el requirements.txt de la raiz al integrar. Las versiones se fijan tras la
+# primera instalacion con `pip freeze`.
+langchain
+langchain-core
+langchain-community
+langchain-chroma
+chromadb
+rank-bm25
+databricks-langchain
+databricks-sdk
+databricks-vectorsearch
+pdfplumber
+ragas
+openai
+pandas
+jupyter
+nbformat
+nbconvert
+ipykernel
+pytest
+pytest-cov
+mypy
+ruff
