@@ -128,3 +128,29 @@ Sí agrégalo, y redacta el borrador del diario (tú tarea es ir llenando el dia
 ### Claude
 
 (Ejecutó: redacción de `diario_decisiones.md` con las siete decisiones tomadas hasta el momento; corrección de este archivo para restituir los acentos de la transcripción; `git commit --amend` sobre el commit inicial para agregar el trailer `Co-Authored-By`; commit de la documentación.)
+
+Commit `4c50619` en `main`, árbol limpio, sin push.
+
+- `diario_decisiones.md`: siete decisiones tuyas (Clean Architecture descartada, estructura A-1 sobre el árbol general, dataset fuera del repo, venv + requirements, transcripción literal, declaración de IA en los commits, modelo de ramas).
+- `ia_usage.md`: transcripción completa hasta este turno.
+- El commit inicial quedó reescrito con el trailer; de aquí en adelante todos lo llevan.
+
+### Amador
+
+1. Listo, ahora crea un directorio docs/ en la raíz del proyecto donde guardarás la documentación del mismo; allí guarda el diccionario de variables del .docx de la prueba para que siempre lo tengamos a la mano. Analiza conceptualmente las variables para que comprendas su naturaleza y ten en cuenta que prod_estimada_oz es una producción estimada. 2. Crea un en modulo_a un directorio llamado exploration donde allí crearás un notebook donde hacemos un EDA de las variables. Procede
+
+### Claude
+
+(Ejecutó: lectura de las primeras filas del CSV y conteo de registros; instalación de pandas, numpy, matplotlib, seaborn, jupyter, nbconvert e ipykernel en el entorno virtual; tres scripts de exploración en un directorio temporal fuera del repositorio para caracterizar nulos, valores especiales, cardinalidades, rangos, correlaciones, estructura temporal y la relación entre `prod_estimada_oz`, `ley_au_gpT`, `ton_rom_acum` y `tipo_mineral`; carga de la skill `dataviz` y validación de la paleta categórica con su script; redacción de `docs/diccionario_variables.md`; generación del notebook `modulo_a/exploration/eda_opus.ipynb` y su ejecución con nbconvert; verificación de que ninguna celda quedó en error, revisión de las figuras generadas y corrección de dos cifras del texto que no coincidían con la salida ejecutada — el rango de medias de ley por frente, de 9.9 a 12.4 g/t, y el porcentaje de grupos con `ton_rom_acum` creciente, de 6.7% a 4.0%, tras agrupar por fecha local en vez de fecha UTC; escritura de `requirements.txt` con las versiones instaladas; rama `feature/eda-modulo-a`.)
+
+Hallazgos del EDA, todos ejecutados y verificados contra el archivo:
+
+- `ley_au_gpT` codifica el faltante como `-1.0` exacto en 2810 registros (5.6%). Es el unico valor negativo y no hay nulos declarados.
+- Ese faltante no es aleatorio: 16.1% de los registros del turno N2 contra 2.1% de los demas.
+- `prod_estimada_oz = ley_au_gpT * ton_rom_acum / 31.1035 * recuperacion(tipo_mineral)`, con OX 0.87, SUL 0.91, MIX 0.83, EST 0.10. R2 = 0.999999999972, error absoluto maximo 6.45e-4 oz. Es nula exactamente en los 2810 registros de ley centinela. Leakage circular: es la respuesta al bloque obligatorio de A-2.
+- La ley no correlaciona con ningun sensor de maquina (todos por debajo de 0.01). Discrimina la ubicacion: 4.5 g/t en Rampa-Norte contra 13.4 g/t en Veta-Principal.
+- El turno se deriva de la hora con desfase UTC-5.
+- `temp_motor_c` es el precursor de falla: 81.4 C con falla contra 71.6 C sin falla; sobre 95 C la tasa de falla es 22.0% frente a 3.3% de base.
+- El mantenimiento preventivo no reduce la tasa de falla (2.8% dentro de la ventana contra 3.3% fuera).
+- `ton_rom_acum` no es acumulado pese al nombre: creciente en 4.0% de los grupos frente-fecha-turno.
+- El extracto cubre 27.9 meses (2023-07-01 a 2025-10-28), no los 18 que dice el enunciado.
