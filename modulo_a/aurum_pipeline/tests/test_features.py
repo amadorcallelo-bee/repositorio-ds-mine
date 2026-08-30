@@ -145,7 +145,29 @@ def test_los_ratios_operacionales_se_calculan() -> None:
     datos = marco_features([{"dias": 0.0}])
     resultado = AurumFeatureBuilder().fit_transform(datos)
     assert resultado["energia_especifica_proxy"].iloc[0] == pytest.approx(200.0 * 1000.0 / 2.0)
-    assert resultado["carga_termica_por_rpm"].iloc[0] == pytest.approx(70.0 / 1000.0)
+    assert resultado["sobretemperatura_por_rpm"].iloc[0] == pytest.approx(
+        (70.0 - domain.TEMPERATURA_REFERENCIA_C) / 1000.0)
+
+
+def test_la_sobretemperatura_se_mide_sobre_un_cero_real() -> None:
+    """Un motor en la temperatura de referencia no tiene sobrecalentamiento que reportar.
+
+    Es la razon de ser de la feature: el cociente sobre grados absolutos no tiene cero fisico
+    y cambia de orden al medirlo en kelvin, de modo que deja de ser una magnitud comparable.
+    """
+    datos = marco_features([
+        {"dias": 0.0, domain.COLUMNA_TEMPERATURA: domain.TEMPERATURA_REFERENCIA_C},
+        {"dias": 1.0, domain.COLUMNA_TEMPERATURA: domain.TEMPERATURA_REFERENCIA_C + 10.0},
+    ])
+    resultado = AurumFeatureBuilder().fit_transform(datos)
+    assert resultado["sobretemperatura_por_rpm"].iloc[0] == pytest.approx(0.0)
+    assert resultado["sobretemperatura_por_rpm"].iloc[1] == pytest.approx(10.0 / 1000.0)
+
+
+def test_la_temperatura_de_referencia_es_configurable() -> None:
+    datos = marco_features([{"dias": 0.0, domain.COLUMNA_TEMPERATURA: 60.0}])
+    resultado = AurumFeatureBuilder(temperatura_referencia=50.0).fit_transform(datos)
+    assert resultado["sobretemperatura_por_rpm"].iloc[0] == pytest.approx(10.0 / 1000.0)
 
 
 def test_un_avance_nulo_no_produce_infinito() -> None:

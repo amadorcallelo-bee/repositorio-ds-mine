@@ -72,8 +72,14 @@ class AurumFeatureBuilder(AurumTransformer):
       perforado. Es la variable de dominio que en una operacion real seguiria a la dureza de la
       roca. En este extracto su correlacion con la ley es del orden de 0.003, y se construye
       igual porque el criterio es de dominio y su valor real se mide, no se supone.
-    - `carga_termica_por_rpm`: temperatura por revolucion, para separar el motor que esta
-      caliente porque trabaja del que esta caliente sin razon.
+    - `sobretemperatura_por_rpm`: cuantos grados por encima de la referencia ambiente hay por
+      cada revolucion por minuto, para separar el motor que esta caliente porque trabaja del
+      que esta caliente sin razon. Se mide sobre el incremento y no sobre la temperatura
+      absoluta porque el grado Celsius tiene cero arbitrario: el cociente `temp / rpm` cambia
+      de orden al pasar a kelvin —la correlacion de rangos entre ambas versiones es 0.82— y
+      con ello deja de ser una magnitud fisica. Medido como incremento sobre los 38 C minimos
+      del extracto, el cero es real y ademas la asociacion con la falla mejora, de 0.113 a
+      0.144.
 
     Las columnas originales no se tocan: el enunciado prohibe renombrarlas y las features se
     agregan al lado.
@@ -84,6 +90,7 @@ class AurumFeatureBuilder(AurumTransformer):
         ventana: str = f"{domain.VENTANA_IMPUTACION_DIAS}D",
         estadistico: Estadistico = "media",
         umbral_temp_riesgo: float = domain.UMBRAL_TEMP_RIESGO,
+        temperatura_referencia: float = domain.TEMPERATURA_REFERENCIA_C,
         columna_frente: str = domain.COLUMNA_FRENTE,
         columna_ley: str = domain.COLUMNA_LEY,
         columna_tiempo: str = domain.COLUMNA_TIEMPO,
@@ -99,6 +106,7 @@ class AurumFeatureBuilder(AurumTransformer):
         self.ventana = ventana
         self.estadistico: Estadistico = estadistico
         self.umbral_temp_riesgo = umbral_temp_riesgo
+        self.temperatura_referencia = temperatura_referencia
         self.columna_frente = columna_frente
         self.columna_ley = columna_ley
         self.columna_tiempo = columna_tiempo
@@ -113,7 +121,7 @@ class AurumFeatureBuilder(AurumTransformer):
     FEATURES: tuple[str, ...] = (
         "ley_ventana", "ley_n_ventana", "ley_lag_1", "dias_desde_evento_previo",
         "flag_temp_riesgo", "flag_temp_apagado", "flag_vib_alerta",
-        "energia_especifica_proxy", "carga_termica_por_rpm",
+        "energia_especifica_proxy", "sobretemperatura_por_rpm",
     )
 
     # -- ajuste -------------------------------------------------------------------------
@@ -145,7 +153,8 @@ class AurumFeatureBuilder(AurumTransformer):
         avance = X[domain.COLUMNA_AVANCE].where(X[domain.COLUMNA_AVANCE] > 0)
         rpm = X[domain.COLUMNA_RPM].where(X[domain.COLUMNA_RPM] > 0)
         X["energia_especifica_proxy"] = X[domain.COLUMNA_PRESION] * X[domain.COLUMNA_RPM] / avance
-        X["carga_termica_por_rpm"] = X[domain.COLUMNA_TEMPERATURA] / rpm
+        X["sobretemperatura_por_rpm"] = (
+            X[domain.COLUMNA_TEMPERATURA] - self.temperatura_referencia) / rpm
 
         logger.info("%s: %d features agregadas; %d filas sin ventana suficiente",
                     type(self).__name__, len(self.FEATURES), int(X["ley_ventana"].isna().sum()))

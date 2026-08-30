@@ -55,6 +55,13 @@ RANGOS_SENSORES: Final[dict[str, tuple[float | None, float | None]]] = {
 #: apagado automatico que publica el diccionario, y captura cuatro veces mas fallas.
 UMBRAL_TEMP_RIESGO: Final[float] = 88.0
 
+#: Temperatura de referencia para medir el sobrecalentamiento del motor. Se toma el minimo
+#: observado en el extracto, que actua como proxy de la temperatura ambiente de la unidad.
+#: Existe porque el grado Celsius es una escala de intervalo con cero arbitrario: un cociente
+#: sobre grados absolutos cambia de orden si se mide en kelvin, y deja de ser una magnitud
+#: fisica. Medido sobre un incremento con cero real, el cociente si lo es.
+TEMPERATURA_REFERENCIA_C: Final[float] = 38.0
+
 #: Ventana temporal con que el imputador busca lecturas vecinas, en dias.
 VENTANA_IMPUTACION_DIAS: Final[int] = 7
 
