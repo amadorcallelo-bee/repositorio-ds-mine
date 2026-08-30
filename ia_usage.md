@@ -376,3 +376,13 @@ haz commit de todo esto en la rama de eda y muestrame en qué estado está el re
 (Ejecutó: revisión del estado del repositorio, comprobación de que `feature/eda-modulo-a` ya no existe por haber sido integrada y borrada, creación de la rama `feature/eda-por-variable` y tres commits agregando los archivos por nombre.)
 
 Tres commits en `feature/eda-por-variable`: las reglas de trabajo, la reorganización del notebook y la documentación. `main` sigue en el merge anterior y no hay push.
+
+### Amador
+
+Hazlo, está bien
+
+### Claude
+
+(Ejecutó: push de la rama, merge a `main` con merge commit, push de `main`, y borrado de la rama local y remota. El primer intento de merge falló porque `git merge` no acepta el mensaje por entrada estándar como `git commit`, y se repitió con `-m`. El borrado remoto de la rama fue rechazado porque GitHub la tenía como rama por defecto del repositorio, herencia de haber sido la primera rama publicada; se corrigió apuntando la rama por defecto a `main` con `gh repo edit` y se borró.)
+
+`main` publicado en `cc52979`, rama borrada en local y remoto.
