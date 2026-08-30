@@ -540,3 +540,49 @@ Voy a cerrar la sesión porque ya tienes la ventana de contexto saturada, pero h
 (Ejecutó: actualización del README con el estado de los módulos y una sección "Próximo paso: Ejercicio A-2" que resume las tres mediciones del EDA que condicionan el modelado; registro del estado del proyecto en la memoria persistente para la próxima sesión; integración de todo el trabajo pendiente a `main` con merge commit y publicación.)
 
 Ejercicio A-1 cerrado: 62 pruebas, cobertura 100%, mypy y ruff limpios, los dos notebooks ejecutados sin errores y la salida del pipeline documentada columna por columna.
+
+## 2026-08-30 — Módulo C, Ejercicio C-1
+
+### Amador
+
+En otra terminal estamos trabajando en el ejercicio A-2 y para ir avanzando entonces nosotros vamos a desarrollar el módulo C que contiene los ejercicio C-1 y C-2. Para trabajar en las dos terminales sin perjudicar ambos trabajos entonces debemos tener las siguientes consideraciones que debemos tener muy en cuenta en esta sesión y no las podemos olvidar "tres cuidados. Lo que puede chocar: 1. La venv es la misma. No instales ni desinstales paquetes desde la otra terminal mientras corre el notebook: un pip install que mueva pandas, numpy o LightGBM en medio de la ejecución la rompe. 2. mlflow.db es un archivo SQLite y el notebook está escribiendo en él. No arranques mlflow ui apuntando a la misma base ni corras otro experimento contra ella hasta que termine. 3. Git. Estamos en feature/a2-modelado y hay trabajo sin commitear. No cambies de rama ni hagas git checkout desde la otra terminal mientras el notebook escribe modeling_demo.ipynb in-place. Si vas a arrancar el Módulo B o C, la vía limpia es una rama propia sobre main en un worktree aparte, no un cambio de rama en el mismo directorio." Para desarrollar el módulo c vamos a crear un directorio en la raíz del proyecto llamado "modulo_c" en donde tendremos inicialmente un directorio para el ejercicio c-1 llamado "arquitectura_plataforma_umlc" y otro para el ejercicio C-2 llamado "rag". Vamos a desarrollar el ejercicio c-1 del .docx, entonces léelo, comprende qué están preguntando y razonemos sobre cada una de las preguntas juntos para responderlas. Como no hay código sino solo diagramación y demás, entonces conectémonos por el MPC a Eraser.io para hacer los diagramas y en el directorio arquitectura_plataforma_umlc tendremos solamente un archivo .md con las respuestas a las preguntas. Procede a razonar sobre el c-1 y a preguntarme para que construyamos juntos
+
+### Claude
+
+(Ejecutó: lectura del enunciado `.docx`; conteo directo del extracto con la biblioteca estándar para no tocar la venv compartida —10 equipos, 13 frentes, 4 sectores—; dimensionamiento del escenario del C-1 escalado desde ese extracto; verificación de la conexión al MCP de Eraser.)
+
+Tres hallazgos antes de preguntar: el escenario no es un problema de volumen, porque 798,912,000 lecturas al año pesan 30 a 89 GB comprimidos y las imágenes de dron son más del 90% de los bytes sin pasar por Delta; el cuello real es la conectividad y no la plataforma, porque en minería subterránea el equipo registra a bordo y descarga al subir a portal; y decidir el C-1 decide el Módulo B, porque el enunciado del B ya describe un híbrido. Señalé además un riesgo de forma: la estructura propuesta se aparta de los tres nombres que el enunciado exige como mínimo y elimina el archivo de imagen.
+
+(Preguntas planteadas: plataforma a defender, estructura de entrega, verificación de la normativa peruana y número de diagramas. Respuestas de Amador: híbrido Databricks más Fabric; estructura literal del enunciado; verificar con búsqueda web; dos diagramas.)
+
+### Amador
+
+1. Los dos diagramas no van en un solo archivo de eraser, van en archivos distintos. 2. Todavía no actualices los .md porque no he aprobado. Cómo vas a estructurar el archivo de respuesta modulo_c/decisiones_arquitectura.md?
+
+### Claude
+
+(Ejecutó: verificación de las obligaciones regulatorias peruanas —ESTAMIN, DAC y reportes geotécnicos de relaves ante OSINERGMIN— con sus cadencias, plazos y multas; consulta de tarifas de Fabric, Databricks y almacenamiento; primer modelo de costos en Python; propuesta de la estructura del documento en nueve secciones más anexo.)
+
+Presenté el índice sección por sección, con el criterio de orden: el regulatorio va antes que la gobernanza porque es lo que la obliga.
+
+### Amador
+
+1. Busca una fuente confiable para darnos una idea de cuánto pesan las imágenes y videos del drone y tener una fuente que respalde el dato. 2.1. Muéstrame la tabla comparativa. 2.2. sé más explícito con la costura que dices para comprenderla cabalmente y también con el punto 2.3. 6.1. Qué queda del lado de Fabric? | Todos los costos y cifras deben tener su respectiva fuente oficial o confiable del 2026 | Deja como pendientes los dos límites de la propuesta para cuando resolvamos C-2. | No, mejor crea modulo_c/costos.py | Responde mis preguntas, formula más y espera mi aprobación para comenzar
+
+### Claude
+
+(Ejecutó: consulta de la Azure Retail Prices API —la lista oficial de Microsoft en JSON y sin autenticación— para Fabric, Databricks, almacenamiento, Event Hubs, IoT Hub y modelos de Foundry, región East US; búsqueda de fuentes para el volumen de imágenes de dron; recálculo completo del modelo con tarifas oficiales; cálculo del costo de tokens del asistente RAG.)
+
+Corregí una afirmación previa: con la tarifa oficial de Premium Jobs Compute la VM no pesa más que el DBU, sino que agrega 75% sobre él. Entregué la tabla comparativa de las tres plataformas con seis criterios y la fila de reversión, las seis reglas de la costura, los cuatro costos del híbrido, y el detalle de qué queda del lado de Fabric. Declaré que el volumen de dron es el dato más débil del modelo y lo acompañé de una prueba de sensibilidad. Costo del asistente RAG: 1.04 USD indexar los 800 documentos, una sola vez, y entre 12 y 263 USD al año en consultas.
+
+(Preguntas planteadas: región tarifaria, tamaño del consumo BI, productos concretos en el borde y qué dejar pendiente. Respuestas de Amador: East US con la variación declarada; F8 con 25 a 40 visores; productos concretos; pendientes solo DR y staging de Fabric.)
+
+### Amador
+
+Privados. Procede
+
+### Claude
+
+(Ejecutó: creación del worktree `../repositorio-ds-mine-c1` sobre rama nueva `feature/c1-arquitectura` desde `main`, sin tocar el checkout donde corre el A-2; creación de dos archivos privados en Eraser y de sus diagramas escritos a mano en DSL, porque la generación por IA de Eraser agotó su cuota; reajuste del diagrama de arquitectura tras revisar el render, que había quedado disperso; exportación de ambos a PNG dentro del repositorio; redacción de `modulo_c/costos.py` con solo biblioteca estándar y `Decimal`, de `modulo_c/tests/test_costos.py` que fija las cifras publicadas, y de `modulo_c/decisiones_arquitectura.md`; incorporación de `modulo_c` a la configuración de pytest, cobertura y mypy; corrección de tres filas de volumetría del documento que estaban mal etiquetadas.)
+
+95 pruebas, cobertura 99.81%, mypy estricto y ruff limpios. Ninguna cifra del documento se escribió a mano: todas salen de ejecutar `costos.py`, y la prueba falla si el documento y el modelo se desincronizan.
