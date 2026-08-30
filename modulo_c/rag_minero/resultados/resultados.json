@@ -1,0 +1,531 @@
+{
+  "chunks_por_variante": {
+    "informe+manual+procedimiento": 82,
+    "seccion": 22,
+    "fijo": 27
+  },
+  "calibracion": {
+    "cobertura_minima": 0.48214285714285715,
+    "aceptadas_del_dominio": 10,
+    "total_del_dominio": 10,
+    "rechazadas_fuera": 10,
+    "total_fuera": 10
+  },
+  "ablacion": [
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "pet-01",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-02",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-03",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-01",
+      "precision": 0.8055555555555555,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-02",
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-03",
+      "precision": 0.75,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-01",
+      "precision": 0.5,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-02",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-03",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "informe+manual+procedimiento",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "cruzada-01",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 82
+    },
+    {
+      "variante": "seccion",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "pet-01",
+      "precision": 0.5888888888888889,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-02",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-03",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-01",
+      "precision": 0.8055555555555555,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-02",
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-03",
+      "precision": 0.5833333333333333,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-01",
+      "precision": 0.5,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-02",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-03",
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "seccion",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "cruzada-01",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 22
+    },
+    {
+      "variante": "fijo",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "pet-01",
+      "precision": 0.5,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-02",
+      "precision": 0.16666666666666666,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "PET-PERF-007",
+      "caso_id": "pet-03",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-01",
+      "precision": 0.8055555555555555,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-02",
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "caso_id": "geo-03",
+      "precision": 0.75,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-01",
+      "precision": 0.5,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-02",
+      "precision": 0.5,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "man-03",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    },
+    {
+      "variante": "fijo",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "caso_id": "cruzada-01",
+      "precision": 1.0,
+      "recall": 1.0,
+      "chunks_indexados": 27
+    }
+  ],
+  "ablacion_tabla": "| Variante | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | PET-PERF-007 | INFORME-GEO-VETA-SUR-2024 | MANUAL-ATLAS-COPCO-L8 | Media |\n|---|---|---|---|---|---|\n| informe+manual+procedimiento | P 1.00 / R 1.00 | P 1.00 / R 1.00 | P 0.63 / R 1.00 | P 0.83 / R 1.00 | P 0.84 / R 1.00 |\n| seccion | P 0.79 / R 1.00 | P 1.00 / R 1.00 | P 0.57 / R 1.00 | P 0.61 / R 1.00 | P 0.71 / R 1.00 |\n| fijo | P 0.75 / R 1.00 | P 0.58 / R 1.00 | P 0.63 / R 1.00 | P 0.67 / R 1.00 | P 0.66 / R 1.00 |",
+  "control": [
+    {
+      "pregunta": "¿Cómo preparo una paella valenciana para seis personas?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Quién ganó la Copa Libertadores de 2023?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "Escríbeme una función en Python que ordene una lista de diccionarios por una clave.",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Cuál es la capital de Australia?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "Recomiéndame una serie de televisión para el fin de semana.",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Qué síntomas tiene la gripe y cómo se trata en casa?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "Redacta un correo para pedir vacaciones a mi jefe.",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 20% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Cuánto cuesta un vuelo de Lima a Madrid en diciembre?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 20% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "Explícame la teoría de la relatividad general.",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 25% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Qué acciones debo comprar este año para invertir?",
+      "rechazada": true,
+      "bloqueada": false,
+      "motivo": "fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada",
+      "texto": "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC (procedimientos, informes geologicos y manuales de equipo)."
+    },
+    {
+      "pregunta": "¿Cuál es la presión hidráulica máxima de la perforadora Sandvik DL432?",
+      "rechazada": false,
+      "bloqueada": false,
+      "motivo": "respondida",
+      "texto": "No está en la documentación disponible. Haría falta el manual técnico de la perforadora Sandvik DL432, específicamente su sección de especificaciones técnicas."
+    },
+    {
+      "pregunta": "¿Cuánto pesa la Sandvik DL432 y qué capacidad de rampa exige?",
+      "rechazada": false,
+      "bloqueada": false,
+      "motivo": "respondida",
+      "texto": "No está en la documentación disponible. Haría falta el manual técnico de la Sandvik DL432 o un documento que especifique su peso y requisitos de capacidad de rampa."
+    },
+    {
+      "pregunta": "¿Cuál fue la ley media del Sector Rampa-Norte en el tercer trimestre de 2024?",
+      "rechazada": false,
+      "bloqueada": false,
+      "motivo": "respondida",
+      "texto": "No está en la documentación disponible. Haría falta un informe geológico específico del Sector Rampa-Norte para el Q3 2024."
+    }
+  ],
+  "ragas": [
+    {
+      "caso_id": "pet-01",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "faithfulness": 0.75,
+      "answer_relevancy": 0.3993661426561059,
+      "context_precision": 0.99999999995,
+      "estado": "respondida",
+      "texto": "Detener la operación inmediatamente y reportar el síntoma H-HIDRA-02. No reiniciar sin autorización [PET-PERF-007#procedimiento#022].",
+      "fuentes": [
+        "PET-PERF-007#procedimiento#022",
+        "MANUAL-ATLAS-COPCO-L8#manual#018",
+        "PET-PERF-007#procedimiento#008",
+        "PET-PERF-007#procedimiento#017",
+        "PET-PERF-007#procedimiento#014",
+        "PET-PERF-007#procedimiento#016"
+      ]
+    },
+    {
+      "caso_id": "pet-02",
+      "documento": "PET-PERF-007",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.794222249848123,
+      "context_precision": 0.9999999999,
+      "estado": "respondida",
+      "texto": "El valor aceptable de vibración en ralentí es <3.5 m/s² RMS [PET-PERF-007#procedimiento#012]. Si se supera y se mide >5 m/s² en ralentí, no se debe iniciar el equipo; se debe solicitar inspección mecánica [PET-PERF-007#procedimiento#012].",
+      "fuentes": [
+        "PET-PERF-007#procedimiento#012",
+        "PET-PERF-007#procedimiento#009",
+        "PET-PERF-007#procedimiento#007",
+        "PET-PERF-007#procedimiento#008",
+        "PET-PERF-007#procedimiento#003",
+        "PET-PERF-007#procedimiento#006"
+      ]
+    },
+    {
+      "caso_id": "pet-03",
+      "documento": "PET-PERF-007",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.6160087829697788,
+      "context_precision": 0.9999999999,
+      "estado": "respondida",
+      "texto": "El motor se enciende en modo ralentí a 800 RPM y se debe esperar 3 minutos de calentamiento antes de extender el brazo [PET-PERF-007#procedimiento#014].",
+      "fuentes": [
+        "PET-PERF-007#procedimiento#014",
+        "PET-PERF-007#procedimiento#015",
+        "PET-PERF-007#procedimiento#017",
+        "PET-PERF-007#procedimiento#021",
+        "MANUAL-ATLAS-COPCO-L8#manual#017",
+        "MANUAL-ATLAS-COPCO-L8#manual#031"
+      ]
+    },
+    {
+      "caso_id": "geo-01",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.744877041961323,
+      "context_precision": 0.99999999998,
+      "estado": "respondida",
+      "texto": "El frente con la mayor ley media en el tercer trimestre de 2024 fue el FR-S2-03, con una ley promedio de 9.21 g/t Au [INFORME-GEO-VETA-SUR-2024#informe#003].",
+      "fuentes": [
+        "INFORME-GEO-VETA-SUR-2024#informe#001",
+        "INFORME-GEO-VETA-SUR-2024#informe#000",
+        "INFORME-GEO-VETA-SUR-2024#informe#005",
+        "INFORME-GEO-VETA-SUR-2024#informe#003",
+        "INFORME-GEO-VETA-SUR-2024#informe#009",
+        "INFORME-GEO-VETA-SUR-2024#informe#002"
+      ]
+    },
+    {
+      "caso_id": "geo-02",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.5752643825298819,
+      "context_precision": 0.3333333333,
+      "estado": "respondida",
+      "texto": "Se aplica un cut-off económico de 2.5 g/t Au, calculado con un precio del oro de USD 2,280/oz [INFORME-GEO-VETA-SUR-2024#informe#004].",
+      "fuentes": [
+        "INFORME-GEO-VETA-SUR-2024#informe#005",
+        "INFORME-GEO-VETA-SUR-2024#informe#001",
+        "INFORME-GEO-VETA-SUR-2024#informe#004",
+        "INFORME-GEO-VETA-SUR-2024#informe#000",
+        "INFORME-GEO-VETA-SUR-2024#informe#009",
+        "INFORME-GEO-VETA-SUR-2024#informe#007"
+      ]
+    },
+    {
+      "caso_id": "geo-03",
+      "documento": "INFORME-GEO-VETA-SUR-2024",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8519381179446875,
+      "context_precision": 0.7499999999625,
+      "estado": "respondida",
+      "texto": "Se recomienda reducir la malla de perforación en el frente FR-S2-03, tramo 320–380 m, para caracterizar correctamente la bifurcación estructural (horse) [INFORME-GEO-VETA-SUR-2024#informe#009]. La malla se debe reducir de 2.0×2.0 m a 1.5×1.5 m [INFORME-GEO-VETA-SUR-2024#informe#009].",
+      "fuentes": [
+        "INFORME-GEO-VETA-SUR-2024#informe#009",
+        "PET-PERF-007#procedimiento#013",
+        "PET-PERF-007#procedimiento#001",
+        "INFORME-GEO-VETA-SUR-2024#informe#001",
+        "PET-PERF-007#procedimiento#000",
+        "PET-PERF-007#procedimiento#017"
+      ]
+    },
+    {
+      "caso_id": "man-01",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.6234002581519685,
+      "context_precision": 0.49999999995,
+      "estado": "respondida",
+      "texto": "La presión hidráulica máxima especificada es 280 bar, pero no debe operarse por encima de 260 bar [MANUAL-ATLAS-COPCO-L8#manual#004].",
+      "fuentes": [
+        "MANUAL-ATLAS-COPCO-L8#manual#000",
+        "MANUAL-ATLAS-COPCO-L8#manual#004",
+        "PET-PERF-007#procedimiento#001",
+        "MANUAL-ATLAS-COPCO-L8#manual#017",
+        "MANUAL-ATLAS-COPCO-L8#manual#018",
+        "MANUAL-ATLAS-COPCO-L8#manual#003"
+      ]
+    },
+    {
+      "caso_id": "man-02",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9773996741329972,
+      "context_precision": 0.9999999999,
+      "estado": "respondida",
+      "texto": "El stock mínimo en UMLC de la bomba hidráulica principal AC-L8-BP-2241 es 1 unidad, y el tiempo de entrega es 15 días [MANUAL-ATLAS-COPCO-L8#manual#038].",
+      "fuentes": [
+        "MANUAL-ATLAS-COPCO-L8#manual#038",
+        "MANUAL-ATLAS-COPCO-L8#manual#035",
+        "MANUAL-ATLAS-COPCO-L8#manual#037",
+        "MANUAL-ATLAS-COPCO-L8#manual#036",
+        "MANUAL-ATLAS-COPCO-L8#manual#033",
+        "MANUAL-ATLAS-COPCO-L8#manual#040"
+      ]
+    },
+    {
+      "caso_id": "man-03",
+      "documento": "MANUAL-ATLAS-COPCO-L8",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.602990635473348,
+      "context_precision": 0.699999999965,
+      "estado": "respondida",
+      "texto": "Causa probable: Válvula de alivio descalibrada o bomba con desgaste [MANUAL-ATLAS-COPCO-L8#manual#019].  \nIntervención de primer nivel: Verificar presión con manómetro portátil en punto P-TEST-01 [MANUAL-ATLAS-COPCO-L8#manual#019].  \nRequiere especialista: Sí siempre [MANUAL-ATLAS-COPCO-L8#manual#019].",
+      "fuentes": [
+        "MANUAL-ATLAS-COPCO-L8#manual#019",
+        "MANUAL-ATLAS-COPCO-L8#manual#018",
+        "MANUAL-ATLAS-COPCO-L8#manual#020",
+        "PET-PERF-007#procedimiento#007",
+        "PET-PERF-007#procedimiento#008",
+        "PET-PERF-007#procedimiento#022"
+      ]
+    },
+    {
+      "caso_id": "cruzada-01",
+      "documento": "PET-PERF-007 + MANUAL-ATLAS-COPCO-L8",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8633889211214991,
+      "context_precision": 0.7555555555303703,
+      "estado": "respondida",
+      "texto": "Cuando OPUS registra ley_au_gpT = -1, significa que la sonda XRF (SX-01) perdió comunicación por interferencia electromagnética o fallo del cable de fibra óptica; este valor no indica ley cero ni mineral estéril [MANUAL-ATLAS-COPCO-L8#manual#029]. El operador debe registrar falla_cod = E-ELEC-04 si la pérdida persiste más de 2 registros consecutivos [MANUAL-ATLAS-COPCO-L8#manual#029]. Sin embargo, el procedimiento PET-PERF-007 indica que se debe registrar el mismo código si persiste más de 2 turnos [PET-PERF-007#procedimiento#016]. Existe contradicción entre los pasajes.",
+      "fuentes": [
+        "MANUAL-ATLAS-COPCO-L8#manual#029",
+        "PET-PERF-007#procedimiento#002",
+        "PET-PERF-007#procedimiento#016",
+        "PET-PERF-007#procedimiento#026",
+        "MANUAL-ATLAS-COPCO-L8#manual#028",
+        "PET-PERF-007#procedimiento#019"
+      ]
+    }
+  ],
+  "ragas_tabla": "| Caso | Documento | Faithfulness | Answer relevancy | Context precision | Estado |\n|---|---|---|---|---|---|\n| pet-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 0.75 | 0.40 | 1.00 | respondida |\n| pet-02 | PET-PERF-007 | 1.00 | 0.79 | 1.00 | respondida |\n| pet-03 | PET-PERF-007 | 1.00 | 0.62 | 1.00 | respondida |\n| geo-01 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.74 | 1.00 | respondida |\n| geo-02 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.58 | 0.33 | respondida |\n| geo-03 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.85 | 0.75 | respondida |\n| man-01 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.62 | 0.50 | respondida |\n| man-02 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.98 | 1.00 | respondida |\n| man-03 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.60 | 0.70 | respondida |\n| cruzada-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.86 | 0.76 | respondida |",
+  "ragas_resumen": {
+    "faithfulness": 0.975,
+    "answer_relevancy": 0.7048856206789713,
+    "context_precision": 0.8038888888337871,
+    "respondidas": 10.0
+  },
+  "tokens_consumidos": 287872,
+  "llamadas_al_modelo": 43
+}

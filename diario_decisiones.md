@@ -407,3 +407,12 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   Qwen3-Next 80B como generador y Llama 3.3 70B como juez —los dos probados— porque no
   bloquea la entrega y el modelo es una variable de configuración; si Claude se habilita
   antes de entregar, se repite solo la corrida final.
+
+- **Cierre del C-2 con la corrida sobre Vector Search.** Cuatro corridas del notebook: las tres
+  primeras fallaron por el ciclo de vida del índice en Databricks —token OAuth vencido durante
+  la media hora que tarda en crearse, pipeline ocupado que rechaza sincronizar, y `asyncio.run`
+  dentro del kernel de Jupyter—, cada una con corrección y prueba de regresión. La cuarta cerró
+  completa: faithfulness 0.97, answer_relevancy 0.70, context_precision 0.80, diez de diez
+  respondidas, trece preguntas de control correctas, y el endpoint borrado por el propio
+  flujo. Acepté que el README leyera las métricas bajas donde lo son (pet-01, geo-02, man-01)
+  en vez de maquillarlas.

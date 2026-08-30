@@ -84,9 +84,13 @@ de tamaño fijo con solapamiento— y mide, sin ningún modelo juez, si los pasa
 aparecen entre los seis chunks recuperados (precisión de contexto con la fórmula sin LLM de
 RAGAS, y recall de referencias). Embeddings reales de `qwen3-embedding-0-6b`:
 
-{{ABLACION}}
+| Variante | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | PET-PERF-007 | INFORME-GEO-VETA-SUR-2024 | MANUAL-ATLAS-COPCO-L8 | Media |
+|---|---|---|---|---|---|
+| informe+manual+procedimiento | P 1.00 / R 1.00 | P 1.00 / R 1.00 | P 0.63 / R 1.00 | P 0.83 / R 1.00 | P 0.84 / R 1.00 |
+| seccion | P 0.79 / R 1.00 | P 1.00 / R 1.00 | P 0.57 / R 1.00 | P 0.61 / R 1.00 | P 0.71 / R 1.00 |
+| fijo | P 0.75 / R 1.00 | P 0.58 / R 1.00 | P 0.63 / R 1.00 | P 0.67 / R 1.00 | P 0.66 / R 1.00 |
 
-Chunks por variante: {{CHUNKS}}.
+Chunks por variante: informe+manual+procedimiento = 82, seccion = 22, fijo = 27.
 
 La propuesta gana donde la unidad es la fila (PET, manual) y empata o gana por poco donde la
 unidad es la sección (informe). La línea base pierde recall en el PET porque parte una fila de
@@ -131,25 +135,39 @@ centinela `ley_au_gpT = -1`, donde los dos documentos discrepan en el umbral: «
 pregunta) y `context_precision` con referencia (los pasajes recuperados son los que la
 respuesta esperada necesita).
 
-{{RAGAS_TABLA}}
+| Caso | Documento | Faithfulness | Answer relevancy | Context precision | Estado |
+|---|---|---|---|---|---|
+| pet-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 0.75 | 0.40 | 1.00 | respondida |
+| pet-02 | PET-PERF-007 | 1.00 | 0.79 | 1.00 | respondida |
+| pet-03 | PET-PERF-007 | 1.00 | 0.62 | 1.00 | respondida |
+| geo-01 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.74 | 1.00 | respondida |
+| geo-02 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.58 | 0.33 | respondida |
+| geo-03 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.85 | 0.75 | respondida |
+| man-01 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.62 | 0.50 | respondida |
+| man-02 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.98 | 1.00 | respondida |
+| man-03 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.60 | 0.70 | respondida |
+| cruzada-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.86 | 0.76 | respondida |
 
-Medias: {{RAGAS_RESUMEN}}.
+Medias: faithfulness 0.97, answer_relevancy 0.70, context_precision 0.80, 10/10 respondidas.
 
 **Modelos de esta corrida.** El workspace de prueba mantiene los modelos propietarios
 (Claude, GPT, Gemini) apagados con un límite de tasa cero, restricción de nivel de cuenta que
-no se corrige desde la configuración del endpoint. La corrida usa `{{GENERADOR}}` como
-generador y `{{JUEZ}}` como juez. Tiene una consecuencia favorable: generador y juez son de
+no se corrige desde la configuración del endpoint. La corrida usa `databricks-qwen3-next-80b-a3b-instruct` como
+generador y `databricks-meta-llama-3-3-70b-instruct` como juez. Tiene una consecuencia favorable: generador y juez son de
 familias distintas, así que no hay sesgo de autoevaluación. Volver a Claude Sonnet 5, que era
 la elección original, es cambiar dos variables de entorno.
 
 **Lectura de las métricas.** `faithfulness` alto es lo esperable de un asistente que solo
 responde con pasajes y que además pasa por un verificador de hechos: una cifra sin respaldo no
-llega a evaluarse, se bloquea antes. `answer_relevancy` es la métrica más baja: RAGAS la mide
-generando preguntas a partir de la respuesta y comparándolas por embedding con la original, y
-penaliza respuestas que contestan más de lo preguntado, como la de pet-01, que junta el
-criterio del PET con la intervención del manual porque así se validó la respuesta esperada.
-`context_precision` baja donde la pregunta se responde con una nota al pie (geo-02) y el
-recuperador trae antes la tabla de ensayos que la nota.
+llega a evaluarse, se bloquea antes. El único 0.75 es pet-01, donde el juez no encontró en los
+pasajes una de las tres afirmaciones de la respuesta. `answer_relevancy` es la métrica más
+baja y la más ruidosa: RAGAS la mide generando preguntas a partir de la respuesta y
+comparándolas por embedding con la original, así que castiga respuestas escuetas frente a
+preguntas largas (pet-01 respondió solo el criterio del PET y omitió la intervención del
+manual que la respuesta esperada incluye). `context_precision` baja donde lo relevante no
+queda arriba: en geo-02 el recuperador trae la tabla de ensayos antes que la nota técnica que
+contiene el cut-off, y en man-01 la fila «Modelo» antes que la de presión máxima; la respuesta
+sale igual porque ambos pasajes están entre los seis, pero la métrica penaliza el orden.
 
 ## 4. Guardrails: dos mecanismos deterministas
 
@@ -160,7 +178,7 @@ inventar una especificación no puede ser del mismo tipo que el componente que l
 **Puerta de dominio.** Fracción de los términos de contenido de la pregunta que existe en el
 corpus indexado. El umbral no se fija a mano: se deriva del golden set y de diez preguntas
 fuera de dominio, y se reporta cuántas de cada lado quedan del lado correcto. Sobre los PDF
-reales: umbral {{UMBRAL}}, {{DOMINIO}} del golden set aceptadas y {{FUERA}} fuera de dominio
+reales: umbral 0.48, 10/10 del golden set aceptadas y 10/10 fuera de dominio
 rechazadas. Un segundo criterio, el score del mejor chunk recuperado, protege contra preguntas
 con vocabulario minero que no tienen pasaje.
 
@@ -173,7 +191,21 @@ bloqueada, nunca una cifra plausible.
 
 Resultado de las trece preguntas de control en la corrida:
 
-{{CONTROL}}
+| Pregunta | Resultado | Motivo o respuesta |
+|---|---|---|
+| ¿Cómo preparo una paella valenciana para seis personas? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Quién ganó la Copa Libertadores de 2023? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| Escríbeme una función en Python que ordene una lista de diccionarios p | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Cuál es la capital de Australia? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| Recomiéndame una serie de televisión para el fin de semana. | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Qué síntomas tiene la gripe y cómo se trata en casa? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| Redacta un correo para pedir vacaciones a mi jefe. | rechazada | fuera de dominio: solo el 20% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Cuánto cuesta un vuelo de Lima a Madrid en diciembre? | rechazada | fuera de dominio: solo el 20% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| Explícame la teoría de la relatividad general. | rechazada | fuera de dominio: solo el 25% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Qué acciones debo comprar este año para invertir? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| ¿Cuál es la presión hidráulica máxima de la perforadora Sandvik DL432? | respondida | No está en la documentación disponible. Haría falta el manual técnico de la perforadora Sandvik DL432, específicamente su sección de especif |
+| ¿Cuánto pesa la Sandvik DL432 y qué capacidad de rampa exige? | respondida | No está en la documentación disponible. Haría falta el manual técnico de la Sandvik DL432 o un documento que especifique su peso y requisito |
+| ¿Cuál fue la ley media del Sector Rampa-Norte en el tercer trimestre d | respondida | No está en la documentación disponible. Haría falta un informe geológico específico del Sector Rampa-Norte para el Q3 2024. |
 
 El verificador encontró además un defecto propio durante la corrida de prueba: leía el `022`
 de una cita `[PET-PERF-007#procedimiento#022]` como una cifra sin respaldo y bloqueaba las
@@ -208,7 +240,7 @@ Lo que cambia en la indexación, en orden de importancia:
 
 ## Consumo de la corrida
 
-{{TOKENS}}
+287,872 tokens contados por el presupuesto en 43 llamadas (las del juez se registran por su estimación conservadora de 9,000 tokens cada una). El endpoint de Vector Search se creó y se borró en la misma sesión; el consumo real en dólares se lee de `system.billing.usage` y se reporta en el diario de decisiones.
 
 ## Límites que se declaran
 

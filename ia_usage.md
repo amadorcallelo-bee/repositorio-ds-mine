@@ -684,3 +684,25 @@ Corre con los modelos abiertos
 ### Claude
 
 (Ejecutó: modelos configurables por variable de entorno; corrida de prueba local completa, que descubrió que el verificador leía el número de las citas de chunk como cifra sin respaldo y bloqueaba las diez respuestas; corrección con prueba de regresión; segunda corrida de prueba: faithfulness 1.00, answer relevancy 0.65, context precision 0.86, diez de diez respondidas, trece preguntas de control correctas; el cliente de Vector Search no lee el perfil OAuth de la CLI y recibió el token del SDK; creación del endpoint y del índice Delta Sync; generación del notebook de la demo; redacción del README del C-2 con marcadores para las cifras finales.)
+
+### Amador
+
+Cuales son los endpoint para consultarlos, y dame una tabla que responda cada una de las preguntas del c-2
+
+### Claude
+
+Tabla de recursos del workspace con su consulta por CLI, y tabla de las cinco preguntas del C-2 con respuesta, ubicación y medición.
+
+### Amador
+
+Si quisieramos "Desplegar Asistente como endpoint de Model Serving con MLflow (modelo tipo ChatAgent) y abrirlo desde el Playground o desde una app de Databricks. [...]", qué tendríamos que hacer?, cuánto nos demora? ya tenemos la estructura, no debería ser difícil
+
+### Claude
+
+Cinco pasos (envoltorio `ChatAgent`, vocabulario como artefacto, registro en MLflow con recursos declarados, `agents.deploy`, app opcional), dos a tres horas, y la consecuencia de costo: un asistente desplegado exige mantener el endpoint de Vector Search vivo. Recomendé cerrar primero la corrida aprobada y tratar el despliegue como ítem aparte.
+
+### Claude
+
+(Ejecutó: cuatro corridas del notebook contra Vector Search. La primera falló por token OAuth vencido durante la creación del índice; la segunda porque el pipeline del índice rechazó sincronizar mientras preparaba recursos; la tercera por `asyncio.run` dentro del kernel de Jupyter. Cada fallo quedó corregido con prueba de regresión y commit. La cuarta cerró completa; el `finally` borró índice y endpoint; el README se rellenó desde `resultados.json`; lectura de `system.billing.usage`, que todavía no refleja la sesión por el rezago de horas de la tabla; 155 pruebas, cobertura 93%, mypy estricto y ruff limpios; la suite del Módulo A y del C-1 sigue en 99.82% con la venv compartida, con las pruebas del RAG saltadas allí porque no tiene sus librerías.)
+
+Resultados finales sobre Vector Search: faithfulness 0.975, answer_relevancy 0.705, context_precision 0.804, 10/10 respondidas; guardrails 10/10 rechazos fuera de dominio y 3/3 negativas honestas sin cifras; ablación con la propuesta en P 0.84 / R 1.00 frente a 0.71 y 0.66 de los controles.
