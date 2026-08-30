@@ -412,7 +412,7 @@ class AlmacenDatabricks(AlmacenVectorial):
                 columns_to_sync=list(COLUMNAS_TABLA),
             )
         else:
-            indice.sync()
+            self._sincronizar_cuando_se_pueda(indice)
         self._esperar_indice()
         return self._cantidad
 
@@ -449,6 +449,27 @@ class AlmacenDatabricks(AlmacenVectorial):
         self._cantidad = 0
 
     # --- ayudantes ---
+
+    def _sincronizar_cuando_se_pueda(
+        self, indice: Any, intervalo: float = 20.0, maximo: float = 1800.0
+    ) -> None:
+        """Dispara la sincronizacion cuando el pipeline del indice admite una nueva.
+
+        Un indice recien creado o con una sincronizacion en curso rechaza `sync()` con
+        "not ready to sync"; se reintenta hasta que el pipeline termine la anterior.
+        """
+        inicio = time.monotonic()
+        while True:
+            try:
+                indice.sync()
+                return
+            except Exception as error:  # el cliente no tipa este rechazo
+                if "not ready to sync" not in str(error):
+                    raise
+                if time.monotonic() - inicio > maximo:
+                    mensaje = f"El indice no admitio sincronizar en {maximo:.0f} s"
+                    raise TimeoutError(mensaje) from error
+                time.sleep(intervalo)
 
     def _esperar_indice(self, intervalo: float = 20.0, maximo: float = 3600.0) -> None:
         """Espera a que el indice este listo consultandolo con un cliente fresco cada vez."""

@@ -328,3 +328,37 @@ def test_la_espera_del_indice_falla_con_el_estado_si_nunca_queda_listo(
     }
     with pytest.raises(TimeoutError, match="PROVISIONING"):
         almacen._esperar_indice(intervalo=0.0, maximo=0.0)
+
+
+def test_la_sincronizacion_reintenta_mientras_el_pipeline_no_este_listo(
+    databricks: tuple[AlmacenDatabricks, _ClienteVsFalso, _WorkspaceFalso],
+) -> None:
+    almacen, _, _ = databricks
+
+    class _IndiceOcupado(_IndiceFalso):
+        def __init__(self) -> None:
+            super().__init__()
+            self.intentos = 0
+
+        def sync(self) -> None:
+            self.intentos += 1
+            if self.intentos < 3:
+                raise RuntimeError("Index is not ready to sync yet. Pipeline is in state CREATED")
+            self.sincronizado = True
+
+    indice = _IndiceOcupado()
+    almacen._sincronizar_cuando_se_pueda(indice, intervalo=0.0)
+    assert indice.sincronizado and indice.intentos == 3
+
+
+def test_otro_error_de_sincronizacion_se_propaga(
+    databricks: tuple[AlmacenDatabricks, _ClienteVsFalso, _WorkspaceFalso],
+) -> None:
+    almacen, _, _ = databricks
+
+    class _IndiceRoto(_IndiceFalso):
+        def sync(self) -> None:
+            raise RuntimeError("permiso denegado")
+
+    with pytest.raises(RuntimeError, match="permiso"):
+        almacen._sincronizar_cuando_se_pueda(_IndiceRoto(), intervalo=0.0)
