@@ -24,7 +24,7 @@ escala al escenario del enunciado.
 | Sensores DCS de planta | cada 30 s | 250 señales |
 | Piezómetros y geotecnia de 2 relaveras | cada 30 s | 120 señales |
 | **Telemetría total** | | **798,912,000 lecturas, 30 a 89 GB comprimidos** |
-| Análisis de laboratorio | cada 4 h | ~6,600 análisis |
+| Análisis de laboratorio | cada 4 h | 6,570 análisis |
 | ERP SAP | lote diario | ~1.8 millones de filas (supuesto: 5 mil por día) |
 | Imágenes de dron | 2 vuelos por semana | 1,560 a 6,240 GB |
 | Reportes PDF | manual | más de 800 documentos |
@@ -330,7 +330,7 @@ de telemetría retenida en caliente y un año de dron en frío con cuatro en arc
 **No hay que saltar a F64.** Los visores gratuitos empiezan en F64 y el reflejo del mercado
 es comprarla para dejar de pagar licencias Pro. El punto de indiferencia está en **313
 visores**: con 40, F8 reservada más licencias cuesta 1,185 USD al mes contra 5,003 de F64.
-Comprar F64 por licencias en una operación de este tamaño quema más de 45,000 USD al año.
+Comprar F64 por licencias en una operación de este tamaño quema 45,808 USD al año.
 
 ```
   F8   pago por uso    1,051 | reservado      625 | descuento 40.5%
@@ -367,11 +367,11 @@ conjunto de evaluación.
 | Acción | Efecto |
 |---|---|
 | Medir 4 a 6 semanas en pago por uso antes de reservar la capacidad | La reserva ahorra 40.5% pero compromete un año; reservar sobre una capacidad mal dimensionada congela el error |
-| No comprar F64 por licencias | Hasta 45,800 USD al año con 40 visores |
+| No comprar F64 por licencias | 45,808 USD al año con 40 visores |
 | Jobs Compute con autoterminación en vez de All-purpose | El DBU interactivo cuesta 83% más que el de jobs |
 | Workers Spot en los jobs no críticos | 34% del nodo-hora |
 | Ciclo de vida a Cool a los 30 días y a Archive a los 180 para las ortofotos | Archive cuesta 5% de Hot; sin la política, los TB de dron se acumulan en caliente |
-| Agregar en la pasarela en vez de pagar por dispositivo | 640 a 1,840 USD al año frente a IoT Hub |
+| Agregar en la pasarela en vez de pagar por dispositivo | 639 a 1,839 USD al año frente a IoT Hub |
 
 ---
 

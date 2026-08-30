@@ -100,6 +100,14 @@ EVENT_HUBS_MILLON: Final[Tarifa] = Tarifa(
 EVENT_HUBS_CAPTURA_HORA: Final[Tarifa] = Tarifa(
     Decimal("0.10"), "USD por hora, Standard Capture", FUENTE_AZURE
 )
+IOT_HUB_S1_MES: Final[Tarifa] = Tarifa(
+    Decimal("25.00"), "USD por unidad S1 y mes", FUENTE_AZURE
+)
+IOT_HUB_S2_MES: Final[Tarifa] = Tarifa(
+    Decimal("250.00"), "USD por unidad S2 y mes", FUENTE_AZURE
+)
+#: Mensajes diarios que admite una unidad S1 de IoT Hub, segun la documentacion del servicio.
+IOT_HUB_S1_MENSAJES_DIA: Final[Decimal] = Decimal("400000")
 EMBEDDING_MIL_TOKENS: Final[Tarifa] = Tarifa(
     Decimal("0.00013"), "USD por 1K tokens, text-embedding-3-large", FUENTE_AZURE
 )
@@ -148,6 +156,15 @@ class Volumetria:
         """Lecturas de telemetria al ano, a periodo de muestreo constante."""
         return Decimal(self.senales_totales) * SEGUNDOS_ANIO / Decimal(self.periodo_muestreo_seg)
 
+    @property
+    def lecturas_por_dia(self) -> Decimal:
+        """Lecturas diarias, que es la unidad en que IoT Hub dimensiona sus niveles."""
+        return self.lecturas_por_anio / DIAS_ANIO
+
+    def analisis_de_laboratorio_por_anio(self, minas: int, cada_horas: int) -> Decimal:
+        """Analisis de laboratorio al ano para `minas` unidades muestreando cada `cada_horas`."""
+        return Decimal("24") / Decimal(cada_horas) * DIAS_ANIO * Decimal(minas)
+
     def gigabytes_por_anio(self, bytes_por_lectura: int) -> Decimal:
         """Tamano anual de la telemetria en Delta comprimido.
 
@@ -195,6 +212,11 @@ class CapacidadFabric:
             La capacidad mayor, que incluye visualizacion sin licencia por usuario.
         """
         return (alterna.mensual_reservado - self.mensual_reservado) / POWER_BI_PRO_MES.valor
+
+    def ahorro_anual_frente_a(self, alterna: CapacidadFabric, visores: int) -> Dinero:
+        """Ahorro anual de esta capacidad con `visores` licencias frente a `alterna`."""
+        con_licencias = self.mensual_reservado + Decimal(visores) * POWER_BI_PRO_MES.valor
+        return (alterna.mensual_reservado - con_licencias) * MESES_ANIO
 
 
 @dataclass(frozen=True)
@@ -269,6 +291,22 @@ class IngestaEventHubs:
         eventos = self.lecturas_por_anio / Decimal("1000000") * EVENT_HUBS_MILLON.valor
         captura = EVENT_HUBS_CAPTURA_HORA.valor * HORAS_ANIO
         return unidades + eventos + captura
+
+    @property
+    def unidades_s1_de_iot_hub(self) -> Decimal:
+        """Unidades S1 de IoT Hub que exigiria el mismo trafico, redondeadas hacia arriba."""
+        diarias = self.lecturas_por_anio / DIAS_ANIO
+        return (diarias / IOT_HUB_S1_MENSAJES_DIA).to_integral_value(rounding="ROUND_CEILING")
+
+    @property
+    def costo_anual_iot_hub_s1(self) -> Dinero:
+        """Lo que costaria el mismo trafico en IoT Hub S1, la alternativa que se descarto."""
+        return self.unidades_s1_de_iot_hub * IOT_HUB_S1_MES.valor * MESES_ANIO
+
+    @property
+    def costo_anual_iot_hub_s2(self) -> Dinero:
+        """Lo que costaria en una sola unidad S2 de IoT Hub."""
+        return IOT_HUB_S2_MES.valor * MESES_ANIO
 
 
 @dataclass(frozen=True)
@@ -464,6 +502,7 @@ class Reporte:
         self._imprimir_volumetria()
         self._imprimir_fabric()
         self._imprimir_databricks()
+        self._imprimir_ingesta()
         self._imprimir_totales()
         self._imprimir_sensibilidad_dron()
         self._imprimir_asistente()
@@ -474,9 +513,14 @@ class Reporte:
             print(f"  {fuente.nombre:<34} {fuente.senales:>5} senales")
         print(f"  {'TOTAL':<34} {self.volumetria.senales_totales:>5} senales")
         print(f"  lecturas por anio: {self.volumetria.lecturas_por_anio:,.0f}")
+        print(f"  lecturas por dia: {self.volumetria.lecturas_por_dia:,.0f}")
         bajo = self.volumetria.gigabytes_por_anio(BYTES_POR_LECTURA_BAJO)
         alto = self.volumetria.gigabytes_por_anio(BYTES_POR_LECTURA_ALTO)
         print(f"  telemetria: {bajo:,.0f} a {alto:,.0f} GB por anio comprimida")
+        laboratorio = self.volumetria.analisis_de_laboratorio_por_anio(minas=3, cada_horas=4)
+        print(f"  analisis de laboratorio: {laboratorio:,.0f} por anio")
+        dron = f"{DRON_GB_ANIO_BAJO:,.0f} a {DRON_GB_ANIO_ALTO:,.0f}"
+        print(f"  imagenes de dron: {dron} GB por anio")
 
     def _imprimir_fabric(self) -> None:
         print("\n== Capacidad Fabric, USD por mes ==")
@@ -496,6 +540,8 @@ class Reporte:
                 f"    {visores:>3} visores -> F8 mas Pro {costo:>8,.0f}"
                 f" contra F64 {f64.mensual_reservado:>8,.0f}"
             )
+        ahorro = f8.ahorro_anual_frente_a(f64, visores=40)
+        print(f"  ahorro anual de F8 mas Pro frente a F64 con 40 visores: {ahorro:,.0f} USD")
 
     def _imprimir_databricks(self) -> None:
         print("\n== Databricks: peso de la maquina sobre el DBU ==")
@@ -508,6 +554,20 @@ class Reporte:
         con_spot = ClusterDatabricks(nodos=1, tarifa_vm=VM_SPOT)
         ahorro = Decimal("1") - con_spot.costo_por_nodo_hora / nodo.costo_por_nodo_hora
         print(f"  con Spot en los workers el nodo-hora baja {ahorro * 100:.0f}%")
+
+    def _imprimir_ingesta(self) -> None:
+        print("\n== Ingesta: Event Hubs contra IoT Hub para el mismo trafico ==")
+        ingesta = IngestaEventHubs(self.volumetria.lecturas_por_anio)
+        print(f"  Event Hubs Standard, 1 unidad con captura: {ingesta.costo_anual:,.0f} USD/anio")
+        print(
+            f"  IoT Hub S1: {ingesta.unidades_s1_de_iot_hub} unidades"
+            f" -> {ingesta.costo_anual_iot_hub_s1:,.0f} USD por anio"
+            f" | S2: {ingesta.costo_anual_iot_hub_s2:,.0f} USD por anio"
+        )
+        print(
+            f"  diferencia: {ingesta.costo_anual_iot_hub_s1 - ingesta.costo_anual:,.0f}"
+            f" a {ingesta.costo_anual_iot_hub_s2 - ingesta.costo_anual:,.0f} USD por anio"
+        )
 
     def _imprimir_totales(self) -> None:
         print("\n== Estimacion anual, USD ==")

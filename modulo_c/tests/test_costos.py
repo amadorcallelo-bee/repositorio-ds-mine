@@ -285,3 +285,43 @@ def test_el_reporte_imprime_las_cifras_del_documento(capsys: pytest.CaptureFixtu
 def test_el_reporte_acepta_escenarios_distintos_a_los_del_documento() -> None:
     austero = replace(ESCENARIO_BAJO, unidades_capacidad=4, visores_power_bi=15)
     Reporte(escenarios=(austero, ESCENARIO_ALTO)).imprimir()
+
+
+# --- Seccion 1 y 4 del documento: cifras que antes se calculaban fuera del modelo ---
+
+
+def test_las_lecturas_diarias_son_2_188_800() -> None:
+    assert redondeado(VOLUMETRIA_UMLC.lecturas_por_dia, "1") == Decimal("2188800")
+
+
+def test_tres_minas_muestreando_cada_4_horas_dan_6570_analisis() -> None:
+    analisis = VOLUMETRIA_UMLC.analisis_de_laboratorio_por_anio(minas=3, cada_horas=4)
+    assert analisis == Decimal("6570")
+
+
+def test_el_mismo_trafico_exige_6_unidades_s1_de_iot_hub() -> None:
+    ingesta = IngestaEventHubs(VOLUMETRIA_UMLC.lecturas_por_anio)
+    assert ingesta.unidades_s1_de_iot_hub == Decimal("6")
+    assert ingesta.costo_anual_iot_hub_s1 == Decimal("1800")
+    assert ingesta.costo_anual_iot_hub_s2 == Decimal("3000")
+
+
+def test_iot_hub_cuesta_entre_639_y_1839_mas_que_event_hubs() -> None:
+    ingesta = IngestaEventHubs(VOLUMETRIA_UMLC.lecturas_por_anio)
+    assert redondeado(ingesta.costo_anual_iot_hub_s1 - ingesta.costo_anual, "1") == Decimal("639")
+    assert redondeado(ingesta.costo_anual_iot_hub_s2 - ingesta.costo_anual, "1") == Decimal("1839")
+
+
+def test_un_trafico_minimo_exige_al_menos_una_unidad_s1() -> None:
+    assert IngestaEventHubs(Decimal("1")).unidades_s1_de_iot_hub == Decimal("1")
+
+
+def test_f8_mas_40_licencias_ahorra_45808_frente_a_f64() -> None:
+    ahorro = CapacidadFabric(8).ahorro_anual_frente_a(CapacidadFabric(64), visores=40)
+    assert redondeado(ahorro, "1") == Decimal("45808")
+
+
+def test_el_ahorro_cambia_de_signo_en_el_punto_de_indiferencia() -> None:
+    f8, f64 = CapacidadFabric(8), CapacidadFabric(64)
+    assert f8.ahorro_anual_frente_a(f64, visores=312) > Decimal("0")
+    assert f8.ahorro_anual_frente_a(f64, visores=313) < Decimal("0")
