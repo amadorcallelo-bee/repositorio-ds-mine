@@ -86,8 +86,12 @@ que -1 es "sin lectura válida de la sonda XRF" codificado dentro del dominio nu
 el caso borde que el imputador tiene que atender. Su distribución no es aleatoria: se
 concentra en el turno N2 (16.1% de sus registros, frente a ~2.1% en los otros tres), lo que
 lo hace un faltante condicionado a una variable observada y no un faltante completamente
-al azar. Imputar sin dejar rastro borraría esa estructura; de ahí que la marca
-`flag_imputed` no sea un adorno sino parte de la información.
+al azar, de modo que los registros sin lectura no son intercambiables con el resto.
+
+El imputador implementa la marca `flag_imputed` con la semántica literal del enunciado: es
+`True` en las filas que **no** se pudieron imputar porque la ventana de siete días del mismo
+frente y tipo de mineral tenía menos de cinco lecturas válidas, y esas filas quedan con la
+ley en `NaN`.
 
 `tipo_mineral` es una clasificación de laboratorio, y el propio Módulo B advierte que se
 corrige retroactivamente tras el análisis: es un dato que llega tarde y cambia. Usarlo como
