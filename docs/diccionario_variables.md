@@ -23,13 +23,13 @@ Definiciones transcritas del enunciado DS-MINE-2025-v2, Sección 2. Las columnas
 | `agua_iny_lmin` | float (L/min) | Flujo de agua de inyección. | Sensor de proceso |
 | `vibracion_rms_ms2` | float (m/s2) | Vibración RMS del cuerpo. Alerta operacional >12. | Sensor de salud mecánica |
 | `temp_motor_c` | float (C) | Temperatura del motor. Apagado automático >95. | Sensor de salud mecánica |
-| `op_id` | string (FK) | Operador anonimizado. Formato `OP-{hash4}`. | Identificador de persona |
-| `equipo_id` | string (FK) | Equipo de perforación. | Identificador de activo |
+| `op_id` | string (FK) | Operador anonimizado. Formato `OP-{hash4}`. | Etiqueta sin contenido en este extracto (ver sección 1) |
+| `equipo_id` | string (FK) | Equipo de perforación. | Etiqueta sin contenido en este extracto (ver sección 1) |
 | `falla_cod` | string / null | Código OPUS de falla. Null = operación normal. | Evento — objetivo de clasificación |
 | `prod_estimada_oz` | float (oz) | Producción estimada por OPUS (calculada, no medida). | Variable derivada — no es medición |
 | `tipo_mineral` | string categórico | Clasificación geológica: OX, SUL, MIX, EST. | Atributo geológico |
 | `sector_geol` | string | Sector geológico UMLC. | Atributo geológico de agregación |
-| `flag_mant_prev` | bool (0/1) | Equipo en ventana de mantenimiento preventivo. | Estado programado |
+| `flag_mant_prev` | bool (0/1) | Equipo en ventana de mantenimiento preventivo. | Estado programado — sin poder discriminante (ver sección 4) |
 
 ## Análisis conceptual
 
@@ -113,7 +113,11 @@ Las dos variables de salud mecánica se comportan distinto frente a la falla:
 `temp_motor_c` separa con claridad (media de 81.4 C en registros con falla contra 71.6 C sin
 falla) y `vibracion_rms_ms2` apenas (3.72 contra 3.59). La temperatura es el candidato
 natural a predictor principal de falla, y sus excedencias tienen tasa de falla del 22%
-contra una prevalencia base del 3.3%.
+contra una prevalencia base del 3.3%. La relación está medida **dentro del mismo registro**:
+temperatura y código de falla vienen en la misma fila, de modo que lo observado es
+coocurrencia y no precedencia. El extracto no contiene evidencia de que la temperatura
+anteceda a la falla, así que hablar de "precursor" sería atribuirle al dato algo que no
+demuestra.
 
 `ton_rom_acum` se documenta como tonelaje acumulado del turno, pero dentro de un mismo
 frente, turno y fecha la serie es monótona creciente en apenas el 4.0% de los grupos. O el
@@ -128,14 +132,18 @@ maximizar, dejando el supuesto declarado.
 
 `falla_cod` es nulo en operación normal: la ausencia es información, no un dato perdido, y
 convertirlo a binario da una prevalencia de 3.3% (1659 de 50000 registros). Ese desbalance
-es el que hay que argumentar en el Ejercicio A-2. Los ocho códigos se reparten en cuatro
-familias por prefijo (H- hidráulica, M- motor, E- eléctrica, B- bomba, S- sello), y ese
-prefijo es una agrupación de subsistema aprovechable si el modelo multiclase se vuelve
-necesario.
+es el que hay que argumentar en el Ejercicio A-2. Los ocho códigos se reparten en cinco
+familias por prefijo (H- hidráulica, M- motor, E- eléctrica, B- bomba, S- sello), con
+frecuencias muy parejas entre 192 y 227 eventos cada uno, y ese prefijo es una agrupación de
+subsistema aprovechable si el modelo multiclase se vuelve necesario.
 
 `flag_mant_prev` marca ventanas de mantenimiento programado: cubre el 2.4% de los registros
-y su tasa de falla (2.8%) no es mejor que la del resto (3.3%) de forma apreciable, lo cual
-es en sí mismo un hallazgo operacional que vale la pena reportar.
+y su tasa de falla es 2.80% contra 3.33% fuera de ventana. La diferencia **no se distingue
+del azar**: con 1213 registros dentro de ventana, la prueba de dos proporciones da z = -1.01 y
+p = 0.31, y el intervalo de confianza del 95% para la tasa dentro de ventana (1.87% a 3.73%)
+contiene la tasa base. La columna no separa ningún subconjunto del extracto. Bajo el supuesto
+de la sección 1 tampoco autoriza a concluir nada sobre el programa preventivo de la unidad
+minera: es una etiqueta más repartida sobre el flujo.
 
 **`prod_estimada_oz` merece su propio párrafo, porque es la trampa del ejercicio.** El
 enunciado la describe como "calculada, no medida directamente", y los datos permiten
@@ -147,7 +155,7 @@ prod_estimada_oz = ley_au_gpT * ton_rom_acum / 31.1035 * recuperacion(tipo_miner
 
 donde 31.1035 es la onza troy en gramos y la recuperación metalúrgica depende del tipo de
 mineral: OX 0.87, SUL 0.91, MIX 0.83, EST 0.10. La reconstrucción ajusta con R2 de
-0.9999999999 y error absoluto máximo de 6.5e-4 oz, atribuible al redondeo a cuatro
+0.999999999972 y error absoluto máximo de 6.5e-4 oz, atribuible al redondeo a cuatro
 decimales del archivo. La confirmación adicional es que `prod_estimada_oz` es nula
 exactamente en los 2810 registros donde la ley vale -1: no hay producción estimada porque no
 hubo ley que multiplicar.

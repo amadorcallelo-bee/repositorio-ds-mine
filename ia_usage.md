@@ -386,3 +386,31 @@ Hazlo, está bien
 (Ejecutó: push de la rama, merge a `main` con merge commit, push de `main`, y borrado de la rama local y remota. El primer intento de merge falló porque `git merge` no acepta el mensaje por entrada estándar como `git commit`, y se repitió con `-m`. El borrado remoto de la rama fue rechazado porque GitHub la tenía como rama por defecto del repositorio, herencia de haber sido la primera rama publicada; se corrigió apuntando la rama por defecto a `main` con `gh repo edit` y se borró.)
 
 `main` publicado en `cc52979`, rama borrada en local y remoto.
+
+### Amador
+
+Ven, bajo esta nueva interpretación quiero que revises todo el notebook del eda y mires si tenemos inconsistencias al igual que en la documentación y en caso de que sí, entonces dime cuales son para que las corrijamos.
+
+### Claude
+
+(Ejecutó: revisión de las veintiséis celdas markdown del notebook, del diccionario de variables y del diario; prueba de dos proporciones sobre `flag_mant_prev` y cálculo de las bandas de muestreo de la tasa de falla por equipo y por operador.)
+
+Reportó trece inconsistencias: cinco que contradicen el supuesto adoptado (la lectura operacional del mantenimiento preventivo en el notebook y en el diccionario, la narrativa de rotación de cuadrillas de la sección 2, dos filas de la tabla de síntesis y la columna "Naturaleza" del diccionario), cinco de lenguaje causal no sostenido por el dato (el uso de "precursor" para `temp_motor_c`, la "cadencia real de perforación", la geología dada por medida, la zona horaria y la lectura de `frente_id`), y tres errores independientes del supuesto (el diccionario decía cuatro familias de falla y enumeraba cinco, el R2 discrepaba entre documentos y las afirmaciones de uniformidad estaban hechas a ojo). Señaló además que `ia_usage.md` no debe tocarse por ser transcripción literal.
+
+### Amador
+
+Ajusta las 13
+
+### Claude
+
+(Ejecutó: reescritura de diez celdas markdown del notebook y de dos filas de la tabla de síntesis; adición al código de la prueba de dos proporciones para `flag_mant_prev` y de una función `banda_esperada` que contrasta la tasa observada por categoría contra la banda de muestreo, más una función auxiliar de distribución normal acumulada para no depender de scipy; corrección de cuatro puntos del diccionario de variables; limpieza de dos advertencias de matplotlib que ensuciaban las salidas, migrando `vert` a `orientation` y el `tight_layout` de `hist_box` a `layout="constrained"`; reejecución completa del notebook y revisión visual de una figura.)
+
+28 figuras, ninguna celda en error, ninguna advertencia en las salidas.
+
+### Amador
+
+ajusta el repo para que esté actualizado y espera para que sigamos con el siguiente paso
+
+### Claude
+
+(Ejecutó: rama `feature/eda-consistencia`, commit de las correcciones, merge a `main` con merge commit, push y borrado de la rama en local y remoto.)
