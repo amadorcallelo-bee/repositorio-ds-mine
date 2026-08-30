@@ -55,3 +55,41 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   una unidad revisable y que se vea el orden en que se construyó. La excepción es este
   commit de arranque, que va directo a `main` por ser el bootstrap del repositorio, cuando
   todavía no hay nada de qué ramificarse.
+
+## 2026-08-29 — Documentación y exploración del dataset
+
+- **Diccionario de variables en el repositorio.** Consideré trabajar con el diccionario en
+  el `.docx` del enunciado, que es donde vive el original, pero elegí transcribirlo a
+  `docs/diccionario_variables.md` porque un `.docx` no se consulta desde un notebook ni se
+  diferencia entre commits: quiero que la definición de cada columna esté a un `grep` de
+  distancia y que el análisis conceptual quede versionado junto al código que lo usa. La
+  transcripción separa lo que dice el enunciado de lo que es interpretación propia, para que
+  el evaluador sepa cuál es cuál.
+
+- **Explorar antes de escribir el pipeline.** Consideré arrancar directo por los
+  transformadores del Ejercicio A-1, que es lo que puntúa, pero elegí hacer primero el EDA
+  en `modulo_a/exploration/` porque el enunciado dice que la ley "puede contener valores
+  especiales — explóralos" y esconde al menos una trampa que solo se ve mirando los datos.
+  Escribir el imputador sin saber que el centinela es `-1.0` y que se concentra en el turno
+  N2 habría producido código correcto sobre un supuesto equivocado.
+
+- **Auditar `prod_estimada_oz` en lugar de asumir.** El enunciado la marca como calculada y
+  pide justificar por qué no usarla. Consideré responder con el argumento conceptual, que ya
+  es suficiente para el punto, pero elegí recuperar la fórmula exacta a partir de los datos
+  porque una afirmación con `R2 = 0.999999999972` y error máximo de 6.45e-4 oz no se discute
+  en la defensa técnica, y porque solo así aparece el matiz que hace la respuesta completa:
+  la variable no es inutilizable en absoluto, es inutilizable **contemporánea al objetivo**;
+  como lag de turnos ya cerrados es legítima.
+
+- **Notebook ejecutado y versionado con sus salidas.** Consideré versionar el notebook
+  limpio, que es la práctica habitual para no ensuciar los diffs, pero elegí guardarlo con
+  las salidas y las figuras porque el evaluador tiene 30 minutos y no necesariamente el CSV
+  a mano: quiero que abra el archivo y vea los resultados sin ejecutar nada. El costo es un
+  diff ilegible en ese archivo; lo asumo porque el notebook es un entregable de lectura, no
+  un módulo que vaya a evolucionar línea a línea.
+
+- **Verificar toda cifra contra la ejecución.** Redacté el análisis mientras exploraba y dos
+  números del texto no coincidían con la salida final del notebook. Consideré dejarlos, ya
+  que el sentido del párrafo no cambiaba, pero elegí corregirlos contra la ejecución porque
+  una cifra que no reproduce el propio notebook del repositorio es exactamente el tipo de
+  detalle que hunde una defensa técnica.
