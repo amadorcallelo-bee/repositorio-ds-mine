@@ -53,10 +53,19 @@ turnos de seis horas que arrancan a las 00:00, 06:00, 12:00 y 18:00, lo que corr
 la operación real. Es la evidencia de que la conversión a hora local del Módulo B tiene que
 ser UTC-5 y de que el turno debe recalcularse, no copiarse.
 
-`op_id` y `equipo_id` son identificadores de alta cardinalidad relativa que sí pueden
-llevar señal (habilidad del operador, estado del activo), y por eso son candidatos legítimos
-a target encoding. También son la vía más directa de fuga de información si el encoding se
-ajusta con la fila que se está codificando, de ahí la exigencia de leave-one-out.
+`op_id` y `equipo_id` son identificadores que en una operación real llevarían señal
+(habilidad del operador, estado del activo). **En este extracto no la llevan**, y el EDA
+documenta por qué: el archivo es un flujo estrictamente serial — ningún par de registros
+comparte instante ni siquiera minuto, la cadencia global es uniforme entre 15 y 34 minutos y
+todos los segundos son 00 — lo que es incompatible con diez perforadoras trabajando en
+paralelo. Se adopta el supuesto de que el extracto es sintético y de que `op_id` y `equipo_id`
+son etiquetas repartidas al azar sobre un flujo único: cada equipo aparece en los trece
+frentes, cada operador en los diez equipos, y las leyes medias y las tasas de falla son planas
+entre unos y otros.
+
+La consecuencia es que ninguna de las dos columnas admite lectura causal ni es candidata útil
+a target encoding: cualquier señal que apareciera sería ruido codificado. La exigencia de
+leave-one-out sigue vigente donde sí hay señal, que es `frente_id`.
 
 ### 2. Geología: lo que la mina tiene, no lo que la máquina hace
 
@@ -161,3 +170,7 @@ Se registran para no confundirlas con errores de lectura:
   RPM ningún registro sale de 800-1400; en presión, el 9.5% sí sale de 180-240.
 - El diccionario declara `falla_cod` con ejemplos de códigos de fallas hidráulicas; el
   archivo contiene ocho códigos de cinco subsistemas distintos.
+- El extracto no contiene un solo evento simultáneo: cero timestamps repetidos, nunca dos
+  registros en el mismo minuto y jamás dos frentes o dos equipos a la vez, con una cadencia
+  global uniforme entre 15 y 34 minutos. Es incompatible con diez equipos operando en
+  paralelo y sostiene el supuesto de extracto sintético descrito arriba.
