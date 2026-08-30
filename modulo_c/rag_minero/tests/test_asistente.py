@@ -12,8 +12,13 @@ from langchain_core.messages import AIMessage
 from rag_minero.asistente import (
     MENSAJE_BLOQUEO,
     MENSAJE_RECHAZO,
+    MENSAJE_VACIO,
+    MOTIVO_TRUNCADA,
+    MOTIVO_VACIO,
+    SALIDA_MAXIMA,
     Asistente,
     PresupuestoTokens,
+    _texto_de,
     contextos_planos,
 )
 from rag_minero.chunking import Trozador
@@ -176,3 +181,101 @@ def test_el_asistente_usa_el_consumo_real_cuando_el_modelo_lo_reporta(
 def test_un_k_invalido_falla(almacen: AlmacenLocal, puerta: PuertaDeDominio) -> None:
     with pytest.raises(ValueError):
         _asistente(almacen, puerta, "x", k=0)
+
+
+def test_salida_maxima_invalida_falla(almacen: AlmacenLocal, puerta: PuertaDeDominio) -> None:
+    with pytest.raises(ValueError):
+        _asistente(almacen, puerta, "x", salida_maxima=0)
+
+
+# --- modelos que razonan antes de responder ---
+
+
+def test_el_tope_de_salida_por_defecto_cubre_el_razonamiento_previo(
+    almacen: AlmacenLocal, puerta: PuertaDeDominio
+) -> None:
+    asistente = _asistente(almacen, puerta, "Respuesta sin cifras.", presupuesto=PresupuestoTokens(maximo=100_000))
+    respuesta = asistente.responder("¿Cuál es la presión hidráulica máxima del equipo?")
+    assert SALIDA_MAXIMA == 1500
+    assert respuesta.tokens_salida == SALIDA_MAXIMA
+
+
+def test_una_respuesta_vacia_se_declara_como_fallo_y_no_como_respuesta(
+    almacen: AlmacenLocal, puerta: PuertaDeDominio
+) -> None:
+    presupuesto = PresupuestoTokens(maximo=100_000)
+    asistente = _asistente(almacen, puerta, "   ", presupuesto=presupuesto)
+    respuesta = asistente.responder("¿Cuál es la presión hidráulica máxima del equipo?")
+    assert respuesta.bloqueada and not respuesta.rechazada and not respuesta.exitosa
+    assert respuesta.texto == MENSAJE_VACIO and respuesta.motivo == MOTIVO_VACIO
+    assert respuesta.verificacion is None and respuesta.borrador == ""
+    assert len(respuesta.fuentes) == 6
+    assert presupuesto.llamadas == 1
+
+
+def test_el_texto_descarta_los_bloques_de_razonamiento_en_lista() -> None:
+    mensaje = AIMessage(
+        content=[
+            {"type": "reasoning", "reasoning": "El pasaje dice 280 bar, asi que..."},
+            {"type": "text", "text": "La presión máxima es 280 bar."},
+        ]
+    )
+    assert _texto_de(mensaje) == "La presión máxima es 280 bar."
+
+
+def test_el_texto_descarta_los_bloques_de_razonamiento_serializados_en_json() -> None:
+    mensaje = AIMessage(
+        content='[{"type": "reasoning", "summary": [{"text": "pienso"}]}, {"type": "text", "text": "Son 280 bar."}]'
+    )
+    assert _texto_de(mensaje) == "Son 280 bar."
+
+
+def test_el_texto_concatena_bloques_de_texto_y_cadenas_sueltas() -> None:
+    mensaje = AIMessage(content=["Son ", {"text": "280 bar"}, {"type": "text", "text": "."}])
+    assert _texto_de(mensaje) == "Son 280 bar."
+
+
+@pytest.mark.parametrize(
+    "texto",
+    [
+        "[PET-PERF-007#procedimiento#022] Se detiene la perforación.",
+        "[1, 2, 3]",
+        '["a", "b"]',
+        '[{"sin_tipo": 1}]',
+        "[]",
+        "[no es json",
+        "",
+    ],
+)
+def test_una_cadena_que_no_es_una_lista_de_bloques_se_devuelve_tal_cual(texto: str) -> None:
+    assert _texto_de(AIMessage(content=texto)) == texto
+
+
+def test_una_salida_cortada_por_el_tope_se_entrega_pero_lo_declara(
+    almacen: AlmacenLocal, puerta: PuertaDeDominio
+) -> None:
+    class ModeloCortado(FakeListChatModel):
+        def invoke(self, *args: object, **kwargs: object) -> AIMessage:
+            return AIMessage(
+                content="La presión hidráulica máxima es 280 bar y",
+                response_metadata={"finish_reason": "length"},
+            )
+
+    asistente = Asistente(almacen, ModeloCortado(responses=["x"]), puerta)
+    respuesta = asistente.responder("¿Cuál es la presión hidráulica máxima del equipo?")
+    assert respuesta.exitosa and respuesta.motivo == MOTIVO_TRUNCADA
+    assert respuesta.texto.endswith(" y")
+
+
+def test_una_salida_completa_no_se_marca_como_truncada(
+    almacen: AlmacenLocal, puerta: PuertaDeDominio
+) -> None:
+    class ModeloCompleto(FakeListChatModel):
+        def invoke(self, *args: object, **kwargs: object) -> AIMessage:
+            return AIMessage(
+                content="La presión hidráulica máxima es 280 bar.",
+                response_metadata={"finish_reason": "stop"},
+            )
+
+    asistente = Asistente(almacen, ModeloCompleto(responses=["x"]), puerta)
+    assert asistente.responder("¿Cuál es la presión hidráulica máxima del equipo?").motivo == "respondida"

@@ -137,37 +137,43 @@ respuesta esperada necesita).
 
 | Caso | Documento | Faithfulness | Answer relevancy | Context precision | Estado |
 |---|---|---|---|---|---|
-| pet-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 0.75 | 0.40 | 1.00 | respondida |
-| pet-02 | PET-PERF-007 | 1.00 | 0.79 | 1.00 | respondida |
-| pet-03 | PET-PERF-007 | 1.00 | 0.62 | 1.00 | respondida |
-| geo-01 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.74 | 1.00 | respondida |
-| geo-02 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.58 | 0.33 | respondida |
-| geo-03 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.85 | 0.75 | respondida |
-| man-01 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.62 | 0.50 | respondida |
-| man-02 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.98 | 1.00 | respondida |
-| man-03 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.60 | 0.70 | respondida |
-| cruzada-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.86 | 0.76 | respondida |
+| pet-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.61 | 1.00 | respondida |
+| pet-02 | PET-PERF-007 | 1.00 | 0.77 | 1.00 | respondida |
+| pet-03 | PET-PERF-007 | 1.00 | 0.61 | 1.00 | respondida |
+| geo-01 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.47 | 1.00 | respondida |
+| geo-02 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.54 | 0.33 | respondida |
+| geo-03 | INFORME-GEO-VETA-SUR-2024 | 1.00 | 0.49 | 0.75 | respondida |
+| man-01 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.58 | 0.50 | respondida |
+| man-02 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.90 | 1.00 | respondida |
+| man-03 | MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.45 | 0.70 | respondida |
+| cruzada-01 | PET-PERF-007 + MANUAL-ATLAS-COPCO-L8 | 1.00 | 0.76 | 0.76 | respondida |
 
-Medias: faithfulness 0.97, answer_relevancy 0.70, context_precision 0.80, 10/10 respondidas.
+Medias: faithfulness 1.00, answer_relevancy 0.62, context_precision 0.80, 10/10 respondidas.
 
 **Modelos de esta corrida.** El workspace de prueba mantiene los modelos propietarios
 (Claude, GPT, Gemini) apagados con un límite de tasa cero, restricción de nivel de cuenta que
-no se corrige desde la configuración del endpoint. La corrida usa `databricks-qwen3-next-80b-a3b-instruct` como
-generador y `databricks-meta-llama-3-3-70b-instruct` como juez. Tiene una consecuencia favorable: generador y juez son de
-familias distintas, así que no hay sesgo de autoevaluación. Volver a Claude Sonnet 5, que era
-la elección original, es cambiar dos variables de entorno.
+no se corrige desde la configuración del endpoint. La corrida usa `databricks-deepseek-v4-flash-0731`
+como generador —el equivalente a Haiku 4.5 entre los habilitados, un modelo que razona antes
+de responder y el único de los probados que señaló la discrepancia entre el PET y el manual
+sobre el centinela `-1`— y `databricks-meta-llama-3-3-70b-instruct` como juez. Tiene una
+consecuencia favorable: generador y juez son de familias distintas, así que no hay sesgo de
+autoevaluación. Volver a Claude Sonnet 5, que era la elección original, es cambiar dos
+variables de entorno.
 
-**Lectura de las métricas.** `faithfulness` alto es lo esperable de un asistente que solo
-responde con pasajes y que además pasa por un verificador de hechos: una cifra sin respaldo no
-llega a evaluarse, se bloquea antes. El único 0.75 es pet-01, donde el juez no encontró en los
-pasajes una de las tres afirmaciones de la respuesta. `answer_relevancy` es la métrica más
-baja y la más ruidosa: RAGAS la mide generando preguntas a partir de la respuesta y
-comparándolas por embedding con la original, así que castiga respuestas escuetas frente a
-preguntas largas (pet-01 respondió solo el criterio del PET y omitió la intervención del
-manual que la respuesta esperada incluye). `context_precision` baja donde lo relevante no
-queda arriba: en geo-02 el recuperador trae la tabla de ensayos antes que la nota técnica que
-contiene el cut-off, y en man-01 la fila «Modelo» antes que la de presión máxima; la respuesta
-sale igual porque ambos pasajes están entre los seis, pero la métrica penaliza el orden.
+**Lectura de las métricas.** `faithfulness` 1.00 en los diez casos es lo esperable de un
+asistente que solo responde con pasajes y que además pasa por un verificador de hechos: una
+cifra sin respaldo no llega a evaluarse, se bloquea antes; en esta corrida el juez no encontró
+ninguna afirmación sin respaldo (la corrida previa con Qwen3-Next 80B dio 0.97 con un 0.75 en
+pet-01, que DeepSeek resolvió citando también la intervención del manual). `answer_relevancy`
+es la métrica más baja y la más ruidosa: RAGAS la mide generando preguntas a partir de la
+respuesta y comparándolas por embedding con la original, así que castiga respuestas escuetas
+frente a preguntas largas; DeepSeek responde más escueto que Qwen3-Next y la media bajó de
+0.70 a 0.62 sin que ninguna respuesta sea incorrecta (geo-01 0.47 contesta frente y ley en una
+frase; man-03 0.45 contesta con las tres celdas de la tabla de fallas). `context_precision` no
+cambió (0.80), porque la recuperación es la misma: baja donde lo relevante no queda arriba
+—en geo-02 el recuperador trae la tabla de ensayos antes que la nota técnica que contiene el
+cut-off, y en man-01 la fila «Modelo» antes que la de presión máxima; la respuesta sale igual
+porque ambos pasajes están entre los seis, pero la métrica penaliza el orden.
 
 ## 4. Guardrails: dos mecanismos deterministas
 
@@ -195,7 +201,7 @@ Resultado de las trece preguntas de control en la corrida:
 |---|---|---|
 | ¿Cómo preparo una paella valenciana para seis personas? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | ¿Quién ganó la Copa Libertadores de 2023? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
-| Escríbeme una función en Python que ordene una lista de diccionarios p | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
+| Escríbeme una función en Python que ordene una lista de diccionarios por una clave. | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | ¿Cuál es la capital de Australia? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | Recomiéndame una serie de televisión para el fin de semana. | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | ¿Qué síntomas tiene la gripe y cómo se trata en casa? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
@@ -203,9 +209,9 @@ Resultado de las trece preguntas de control en la corrida:
 | ¿Cuánto cuesta un vuelo de Lima a Madrid en diciembre? | rechazada | fuera de dominio: solo el 20% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | Explícame la teoría de la relatividad general. | rechazada | fuera de dominio: solo el 25% de los terminos de la pregunta aparece en la documentacion minera indexada |
 | ¿Qué acciones debo comprar este año para invertir? | rechazada | fuera de dominio: solo el 0% de los terminos de la pregunta aparece en la documentacion minera indexada |
-| ¿Cuál es la presión hidráulica máxima de la perforadora Sandvik DL432? | respondida | No está en la documentación disponible. Haría falta el manual técnico de la perforadora Sandvik DL432, específicamente su sección de especif |
-| ¿Cuánto pesa la Sandvik DL432 y qué capacidad de rampa exige? | respondida | No está en la documentación disponible. Haría falta el manual técnico de la Sandvik DL432 o un documento que especifique su peso y requisito |
-| ¿Cuál fue la ley media del Sector Rampa-Norte en el tercer trimestre d | respondida | No está en la documentación disponible. Haría falta un informe geológico específico del Sector Rampa-Norte para el Q3 2024. |
+| ¿Cuál es la presión hidráulica máxima de la perforadora Sandvik DL432? | respondida | No esta en la documentacion disponible. Haría falta el manual de especificaciones técnicas del equipo Sandvik DL432; el único manual disponible es el del Atlas Copco L8 [MANUAL-ATLAS-COPCO-L8#manual#004]. |
+| ¿Cuánto pesa la Sandvik DL432 y qué capacidad de rampa exige? | respondida | No esta en la documentacion disponible. Los pasajes solo especifican el peso del Atlas Copco L8 (13,200 kg) [MANUAL-ATLAS-COPCO-L8#manual#012], pero no hay ficha técnica de la Sandvik DL432; haría falta el manual o especificaciones técnicas de ese equipo. |
+| ¿Cuál fue la ley media del Sector Rampa-Norte en el tercer trimestre de 2024? | respondida | No esta en la documentacion disponible. La documentacion proporcionada corresponde exclusivamente al Sector Veta Sur [INFORME-GEO-VETA-SUR-2024#informe#000]; se necesitaria el informe geologico del Sector Rampa-Norte para el Q3 2024. |
 
 El verificador encontró además un defecto propio durante la corrida de prueba: leía el `022`
 de una cita `[PET-PERF-007#procedimiento#022]` como una cifra sin respaldo y bloqueaba las
@@ -240,26 +246,23 @@ Lo que cambia en la indexación, en orden de importancia:
 
 ## Consumo de la corrida
 
-287,872 tokens contados por el presupuesto en 43 llamadas (las del juez se registran por su estimación conservadora de 9,000 tokens cada una). El endpoint de Vector Search se creó y se borró en la misma sesión; el consumo real en dólares se lee de `system.billing.usage` y se reporta en el diario de decisiones.
+291,849 tokens contados por el presupuesto en 43 llamadas (las del juez se registran por su estimación conservadora de 9,000 tokens cada una). El endpoint de Vector Search se creó y se borró en la misma sesión; el consumo real en dólares se lee de `system.billing.usage` y se reporta en el diario de decisiones.
 
-## Pendientes al 2026-08-30
+## Lo que exigió un generador que razona antes de responder
 
-1. **Corrida final con DeepSeek V4 Flash como generador** (`RAG_MODELO_GENERADOR=databricks-deepseek-v4-flash-0731`),
-   Llama 3.3 70B sigue de juez. Es el equivalente a Haiku 4.5 entre los modelos habilitados en el
-   workspace y el único que, en la prueba, señaló la discrepancia entre el PET y el manual sobre
-   el centinela `-1`. Exige dos ajustes con prueba en `asistente.py`: subir `salida_maxima` a unos
-   1,500 tokens porque razona antes de responder, y quedarse con los bloques `text` de su salida,
-   que llega con bloques `reasoning` delante (como lista de dicts o como cadena JSON). Luego:
-   recrear endpoint e índice (media hora), reejecutar `rag_demo.ipynb` y rellenar este README con
-   `resultados/resultados.json`. Costo estimado: menos de 0.50 USD en tokens y ~1 USD de endpoint.
-2. **Integrar `feature/c2-rag` a `main`** con merge commit cuando el A-2 esté commiteado;
-   conflictos de agregado esperables en `README.md`, `diario_decisiones.md`, `ia_usage.md` y
-   `pyproject.toml`, y consolidar `requirements.txt` con `modulo_c/rag_minero/requirements.txt`.
-3. **Leer la factura real** en `system.billing.usage` cuando refleje la sesión (rezago de horas) y
-   anotarla en el diario; el estimado de la sesión es 2.28 USD (peor caso con cola del endpoint,
-   9.00 USD).
-4. Opcional, fuera del enunciado: desplegar el asistente como Databricks App (~1.5 h, exige el
-   endpoint de Vector Search vivo a 0.28 USD/h mientras exista).
+La corrida final es la de este README. DeepSeek V4 Flash piensa antes de escribir y ese
+razonamiento consume tokens de salida, lo que dejó cuatro reglas en `asistente.py`, cada una
+con su prueba:
+
+1. El tope de salida es 1,500 tokens y lo comparten el modelo y el presupuesto (con 200, la
+   pregunta cruzada gastaba todo el tope razonando y la respuesta llegaba vacía).
+2. El texto se extrae solo de los bloques `text` del mensaje: el razonamiento puede llegar
+   como bloque aparte, en lista o serializado en JSON, y se descarta sin confundirlo con una
+   respuesta que empieza por una cita entre corchetes.
+3. Una respuesta vacía se declara como fallo, con su motivo, en lugar de contarse como
+   respondida.
+4. Una salida cortada por el tope (`finish_reason="length"`) se entrega, pero el motivo lo
+   declara, porque un procedimiento de seguridad a medias no debe pasar por completo.
 
 Claude Sonnet 5 y Haiku 4.5 no están disponibles en el workspace: Sonnet devuelve «rate limit of
 0» (restricción de nivel de cuenta que solo levanta soporte de Databricks) y Haiku no existe

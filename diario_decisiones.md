@@ -430,3 +430,20 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   desplegar el agente en Databricks sin sobreingeniería. Claude comparó cuatro vías y
   recomendó una Databricks App que reutiliza el código tal cual; acepté dejarlo como opcional
   fuera del enunciado, porque exige mantener vivo el endpoint de Vector Search.
+
+- **La corrida final con DeepSeek V4 Flash, con revisión adversarial y respuestas claras.**
+  De los cuatro pendientes que quedaron escritos al cierre de la sesión anterior, autoricé solo
+  el primero, la corrida final con DeepSeek V4 Flash como generador, y pedí que pasara por
+  revisión adversarial antes de darse por terminada, con una exigencia adicional: que las
+  respuestas del C-2 —las del asistente y las del README a las cinco preguntas del enunciado—
+  fueran muy claras. El merge a `main`, la lectura de la factura y la Databricks App siguen
+  esperando mi indicación.
+
+- **El C-2 se integra a `main` y la App queda descartada.** Con el A-2 ya integrado autoricé
+  el merge de `feature/c2-rag` a `main` con merge commit, la lectura de la factura real en
+  `system.billing.usage`, y descarté el despliegue opcional como Databricks App: está fuera
+  del enunciado y exige mantener vivo el endpoint de Vector Search. Pedí además una revisión
+  adversarial de cobertura: verificar contra el enunciado que el C-2 responde todo lo que se
+  pregunta. La factura solo refleja por ahora 0.73 USD (warehouse SQL); el serving y el
+  Vector Search de la sesión de la mañana siguen sin aparecer por el rezago de horas, así que
+  la cifra completa se anota cuando el sistema la publique.

@@ -13,9 +13,11 @@ genero y elemento supera a la linea base, y si dejara de superarla, lo diria.
 RAGAS si usa un modelo juez y por eso cuesta dinero. Se reportan las tres metricas que pide
 el enunciado: `faithfulness` (la respuesta se sostiene en los pasajes), `answer_relevancy`
 (la respuesta atiende la pregunta) y `context_precision` (los pasajes recuperados son los
-que la respuesta esperada necesita). El juez y el generador son el mismo modelo, Sonnet 5,
-y ese sesgo de autoevaluacion se declara en el README: lo compensan `context_precision`,
-que juzga la recuperacion y no la respuesta, y el verificador de hechos, que no juzga nada.
+que la respuesta esperada necesita). Juez y generador son configuracion (`RAG_MODELO_JUEZ`
+y `RAG_MODELO_GENERADOR`); en la corrida final son de familias distintas (Llama 3.3 70B
+juzga a DeepSeek V4 Flash), asi que no hay sesgo de autoevaluacion. Si alguna vez fueran el
+mismo modelo, lo compensan `context_precision`, que juzga la recuperacion y no la
+respuesta, y el verificador de hechos, que no juzga nada.
 
 Las metricas se inyectan como objetos con `ascore`, que es la interfaz de RAGAS 0.4, para
 que la evaluacion se pruebe con jueces falsos y el juez real solo entre por

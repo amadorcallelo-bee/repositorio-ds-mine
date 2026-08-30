@@ -26,7 +26,13 @@ from typing import Any, Final, Literal
 
 from langchain_core.embeddings import Embeddings
 
-from rag_minero.asistente import Asistente, PresupuestoTokens, Respuesta, crear_modelo_databricks
+from rag_minero.asistente import (
+    SALIDA_MAXIMA,
+    Asistente,
+    PresupuestoTokens,
+    Respuesta,
+    crear_modelo_databricks,
+)
 from rag_minero.chunking import Trozador
 from rag_minero.documentos import DocumentoTecnico, LectorPdf
 from rag_minero.errores import ConfiguracionError
@@ -210,9 +216,14 @@ class Flujo:
         """El asistente sobre el almacen, con el generador de Databricks y el presupuesto."""
         if self.puerta is None:
             raise RuntimeError("llama a calibrar() antes de construir_asistente()")
-        modelo = crear_modelo_databricks(self.configuracion.modelo_generador)
+        modelo = crear_modelo_databricks(self.configuracion.modelo_generador, SALIDA_MAXIMA)
         return Asistente(
-            almacen, modelo, self.puerta, k=self.configuracion.k, presupuesto=self.presupuesto
+            almacen,
+            modelo,
+            self.puerta,
+            k=self.configuracion.k,
+            presupuesto=self.presupuesto,
+            salida_maxima=SALIDA_MAXIMA,
         )
 
     def probar_control(self, asistente: Asistente) -> list[Respuesta]:

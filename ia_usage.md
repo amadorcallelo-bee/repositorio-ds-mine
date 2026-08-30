@@ -774,3 +774,41 @@ Actualiza la documentación porque tenemos la ventana de contexto saturada y dej
 ### Claude
 
 (Ejecutó: sección «Pendientes al 2026-08-30» en el README del C-2, entradas del diario y de este registro, nota persistente con el estado y los pendientes, commit.)
+
+### Amador
+
+cuáles son nuestros pendientes para cerrar este c-2? dime uno a uno pero sé muy conciso porque tienes la mala práctica de usar mucho texto en tus respuestas. solo procede con mi autorización explícita
+
+### Claude
+
+(Ejecutó: lectura de las notas persistentes, del worktree `feature/c2-rag` y de la sección «Pendientes al 2026-08-30» del README del C-2.) Listé los cuatro pendientes: corrida final con DeepSeek V4 Flash, merge a `main` cuando el A-2 esté commiteado, lectura de la factura real, y la Databricks App opcional.
+
+### Amador
+
+procede con 1 y ha revisión adversorial. garantiza que sean muy claras las respuestas para c-2
+
+### Claude
+
+(Ejecutó: verificación de que el workspace no tiene endpoint de Vector Search ni tablas en `workspace.rag_minero`; dos sondas a `databricks-deepseek-v4-flash-0731` vía `ChatDatabricks` 0.20.0 con el prompt real del asistente: el contenido llega como cadena sin bloques de razonamiento, la pregunta cruzada consume 439 tokens de salida para cuatro frases visibles, y con un tope de 200 tokens la respuesta llega vacía con `finish_reason="length"`.)
+
+Cambios en `asistente.py`: tope de salida `SALIDA_MAXIMA = 1500` compartido entre el modelo y el presupuesto; `_texto_de` extrae solo bloques `text` y reconoce la lista de bloques serializada en JSON sin confundirla con una respuesta que empieza por una cita; una respuesta vacía se declara como fallo (`bloqueada`, motivo «respuesta vacia») en lugar de contarse como respondida; una salida cortada por el tope se entrega pero con motivo «salida truncada». `flujo.py` pasa el tope a los dos lados; docstring de `evaluacion.py` corregido (juez y generador son configuración y de familias distintas). Once pruebas nuevas. 168 pruebas pasan, cobertura 85.6%, mypy estricto y ruff limpios; las dos pruebas de integración sobre los PDF reales pasan. Celda de introducción del notebook actualizada a DeepSeek V4 Flash. Corrida de `rag_demo.ipynb` lanzada con `RAG_ALMACEN=databricks`, `RAG_VS_ENDPOINT=rag-minero-vs`, `RAG_MODELO_GENERADOR=databricks-deepseek-v4-flash-0731`, `RAG_MODELO_JUEZ=databricks-meta-llama-3-3-70b-instruct`, tope de 600,000 tokens.
+
+### Amador
+
+avísame cuando termine y muéstrame las respuestas del golden set
+
+### Claude
+
+(Ejecutó: espera del cierre del notebook en segundo plano.)
+
+### Amador
+
+Ya podemos hacer el merge porque A-2 ya está commiteado, puedes proceder también entonces con 3 y con 4 no. Haz revisión adversorial para garantizar que estamos respondiendo todo lo que se nos pregunta en C-2
+
+### Claude
+
+(Ejecutó: consulta de `system.billing.usage` con el script de facturación de la sesión anterior: 0.7282 USD visibles a precio de lista, dominados por el warehouse SQL; el serving y el Vector Search de la sesión de la mañana aún no aparecen por el rezago. Extracción de la sección C-2 del enunciado para la revisión de cobertura.)
+
+### Claude
+
+(Ejecutó: cierre de la corrida final de `rag_demo.ipynb` con DeepSeek V4 Flash, 30 minutos, exit 0, endpoint `rag-minero-vs` creado y borrado por el propio flujo. Resultados: faithfulness 1.00, answer_relevancy 0.62, context_precision 0.80, 10/10 respondidas, 13/13 preguntas de control correctas —10 rechazadas por la puerta, 3 negativas honestas—, cruzada-01 señala la discrepancia PET/manual, 291,849 tokens en 43 llamadas. README rellenado desde `resultados/resultados.json` y reescritos los párrafos de modelos, lectura de métricas y cierre de pendientes. 168 pruebas, cobertura 85.6%, mypy estricto y ruff limpios.)

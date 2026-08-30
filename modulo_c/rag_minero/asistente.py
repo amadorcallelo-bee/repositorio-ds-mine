@@ -12,10 +12,19 @@ La cadena es deliberadamente corta y cada eslabon es un objeto que se prueba sol
    alguno no tiene respaldo, la respuesta se bloquea y se conserva el borrador para
    auditoria.
 
-El modelo se inyecta como `BaseChatModel` de LangChain. En produccion es
-`databricks-claude-sonnet-5` a traves de `ChatDatabricks`, con temperatura cero porque un
+El modelo se inyecta como `BaseChatModel` de LangChain. En la demo es el endpoint que
+nombra `RAG_MODELO_GENERADOR` a traves de `ChatDatabricks`, con temperatura cero porque un
 asistente de procedimientos de seguridad no debe variar su respuesta entre dos consultas
 iguales; en las pruebas es un modelo falso con respuestas fijas.
+
+Dos decisiones existen por los modelos que razonan antes de responder (DeepSeek V4 Flash, el
+generador de la corrida final). La primera es el tope de salida: un modelo de razonamiento
+gasta cientos de tokens pensando y, si el tope se agota ahi, devuelve una cadena vacia con
+`finish_reason="length"`; se midio con la pregunta cruzada del golden set: 439 tokens de
+salida para cuatro frases visibles, y con un tope de 200 la respuesta llego vacia. La
+segunda es que el texto se extrae solo de los bloques `text` del mensaje, porque el
+razonamiento puede llegar como bloque aparte, y una respuesta vacia se trata como fallo
+declarado y no como respuesta valida.
 
 Todo consumo de tokens pasa por `PresupuestoTokens`, que se niega a llamar al modelo si la
 estimacion de la siguiente llamada superaria el tope. Es la cuenta que protege los 40 USD
@@ -24,9 +33,10 @@ del trial: el costo no se controla mirando la factura despues sino contando ante
 
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Final
+from typing import Any, Final
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage
@@ -62,6 +72,9 @@ PLANTILLA: Final[ChatPromptTemplate] = ChatPromptTemplate.from_messages(
 #: Aproximacion de caracteres por token para estimar antes de llamar; se sobreestima a
 #: proposito, porque la cuenta protege un presupuesto y no una metrica.
 CARACTERES_POR_TOKEN: Final[int] = 3
+#: Tope de tokens de salida por llamada. Cubre el razonamiento previo de un modelo que piensa
+#: antes de escribir (ver el docstring del modulo); con 600 la pregunta cruzada quedaba justa.
+SALIDA_MAXIMA: Final[int] = 1500
 MENSAJE_RECHAZO: Final[str] = (
     "Solo puedo responder preguntas sobre la documentacion tecnica minera de la UMLC "
     "(procedimientos, informes geologicos y manuales de equipo)."
@@ -70,6 +83,12 @@ MENSAJE_BLOQUEO: Final[str] = (
     "La respuesta generada afirmaba datos que no estan respaldados por la documentacion "
     "recuperada y se bloqueo por seguridad. Consulta el documento original."
 )
+MENSAJE_VACIO: Final[str] = (
+    "El modelo no produjo una respuesta (agoto su salida o devolvio un mensaje vacio). "
+    "Consulta el documento original o repite la pregunta."
+)
+MOTIVO_VACIO: Final[str] = "respuesta vacia: el modelo no devolvio texto"
+MOTIVO_TRUNCADA: Final[str] = "respondida, pero la salida se corto en el tope de tokens"
 
 
 @dataclass
@@ -120,11 +139,47 @@ class Respuesta:
 
 
 def _texto_de(mensaje: AIMessage) -> str:
-    contenido = mensaje.content
+    """Solo los bloques `text` del mensaje; el razonamiento, venga como venga, se descarta.
+
+    Un modelo que razona puede entregar el contenido como cadena, como lista de bloques
+    (`{"type": "reasoning", ...}` delante de `{"type": "text", ...}`) o como esa misma lista
+    serializada en JSON. Una cadena que no es JSON de bloques se devuelve tal cual, asi que
+    una respuesta que empieza por una cita entre corchetes no se confunde con una lista.
+    """
+    contenido: str | list[str | dict[str, Any]] = mensaje.content
     if isinstance(contenido, str):
-        return contenido
-    partes = [p if isinstance(p, str) else str(p.get("text", "")) for p in contenido]
+        bloques = _bloques_desde_json(contenido)
+        if bloques is None:
+            return contenido
+        contenido = bloques
+    partes: list[str] = []
+    for parte in contenido:
+        if isinstance(parte, str):
+            partes.append(parte)
+        elif parte.get("type", "text") == "text":
+            partes.append(str(parte.get("text", "")))
     return "".join(partes)
+
+
+def _bloques_desde_json(texto: str) -> list[str | dict[str, Any]] | None:
+    """La lista de bloques si `texto` es su serializacion JSON; `None` en cualquier otro caso."""
+    recortado = texto.strip()
+    if not recortado.startswith("["):
+        return None
+    try:
+        candidato = json.loads(recortado)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(candidato, list) or not candidato:
+        return None
+    if not all(isinstance(b, dict) and "type" in b for b in candidato):
+        return None
+    return list(candidato)
+
+
+def _truncada(mensaje: AIMessage) -> bool:
+    """Verdadero si el proveedor reporto que la salida se corto por el tope de tokens."""
+    return str(mensaje.response_metadata.get("finish_reason", "")).lower() == "length"
 
 
 def _uso_de(mensaje: AIMessage, estimado_entrada: int, estimado_salida: int) -> tuple[int, int]:
@@ -147,10 +202,12 @@ class Asistente:
         verificador: VerificadorDeHechos | None = None,
         k: int = 6,
         presupuesto: PresupuestoTokens | None = None,
-        salida_maxima: int = 600,
+        salida_maxima: int = SALIDA_MAXIMA,
     ) -> None:
         if k < 1:
             raise ValueError("k debe ser al menos 1")
+        if salida_maxima < 1:
+            raise ValueError("salida_maxima debe ser al menos 1")
         self._almacen = almacen
         self._modelo = modelo
         self._puerta = puerta
@@ -188,21 +245,36 @@ class Asistente:
         tokens_entrada, tokens_salida = _uso_de(mensaje, estimado_entrada, self._salida_maxima)
         if self._presupuesto is not None:
             self._presupuesto.registrar(tokens_entrada, tokens_salida)
+        if not borrador:
+            return Respuesta(
+                pregunta=pregunta,
+                texto=MENSAJE_VACIO,
+                rechazada=False,
+                bloqueada=True,
+                motivo=MOTIVO_VACIO,
+                fuentes=tuple(r.chunk_id for r in resultados),
+                contextos=contextos,
+                veredicto=veredicto,
+                tokens_entrada=tokens_entrada,
+                tokens_salida=tokens_salida,
+            )
 
         verificacion = self._verificador.verificar(
             borrador, [r.documento.page_content for r in resultados]
         )
         bloqueada = not verificacion.aprobada
+        if bloqueada:
+            motivo = "sin respaldo: " + ", ".join(verificacion.sin_respaldo)
+        elif _truncada(mensaje):
+            motivo = MOTIVO_TRUNCADA
+        else:
+            motivo = "respondida"
         return Respuesta(
             pregunta=pregunta,
             texto=MENSAJE_BLOQUEO if bloqueada else borrador,
             rechazada=False,
             bloqueada=bloqueada,
-            motivo=(
-                "sin respaldo: " + ", ".join(verificacion.sin_respaldo)
-                if bloqueada
-                else "respondida"
-            ),
+            motivo=motivo,
             fuentes=tuple(r.chunk_id for r in resultados),
             contextos=contextos,
             veredicto=veredicto,
@@ -227,9 +299,13 @@ class Asistente:
 
 
 def crear_modelo_databricks(
-    endpoint: str = "databricks-claude-sonnet-5", salida_maxima: int = 600
+    endpoint: str = "databricks-claude-sonnet-5", salida_maxima: int = SALIDA_MAXIMA
 ) -> BaseChatModel:
-    """`ChatDatabricks` sobre un endpoint de Foundation Model APIs, con temperatura cero."""
+    """`ChatDatabricks` sobre un endpoint de Foundation Model APIs, con temperatura cero.
+
+    `salida_maxima` es el mismo tope que reserva el `Asistente`: si difieren, el presupuesto
+    cuenta una cosa y el modelo puede gastar otra.
+    """
     from databricks_langchain import ChatDatabricks
 
     modelo: BaseChatModel = ChatDatabricks(
