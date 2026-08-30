@@ -609,3 +609,9 @@ Formato: consideré X pero elegí Y porque Z. Orden cronológico.
   pregunta. La factura solo refleja por ahora 0.73 USD (warehouse SQL); el serving y el
   Vector Search de la sesión de la mañana siguen sin aparecer por el rezago de horas, así que
   la cifra completa se anota cuando el sistema la publique.
+
+- **El Módulo C queda integrado también en el remoto.** Con el C-2 mergeado en `main` local,
+  pedí ajustar repositorio y documentación para que todo el Módulo C quedara integrado:
+  publicar `main` en GitHub, borrar la rama y el worktree del C-2 ya integrados, y corregir la
+  última línea del README que todavía decía que `modulo_c/` faltaba por crear. El Módulo B
+  sigue en sus ramas y su worktree, intacto.
