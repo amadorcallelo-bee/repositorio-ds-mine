@@ -1,10 +1,25 @@
-# Entorno base para el analisis exploratorio del Modulo A.
-# Las dependencias de modelado (lightgbm, xgboost, mlflow, shap, fastapi) se agregan
-# cuando se implemente el Ejercicio A-2.
+# Entorno del Modulo A. Python 3.12.
+#
+# Las dependencias de modelado (scikit-learn, lightgbm, xgboost, mlflow, shap, fastapi) se
+# agregan cuando se implemente el Ejercicio A-2.
+
+# Analisis y datos
 pandas==3.0.5
 numpy==2.5.2
+
+# Figuras del EDA
 matplotlib==3.11.1
+seaborn==0.13.2
+
+# Notebooks
 jupyter==1.1.1
 nbformat==5.11.1
 nbconvert==7.17.1
 ipykernel==7.3.0
+
+# Calidad: pruebas, cobertura, tipos y linter
+pytest==9.1.1
+pytest-cov==7.1.0
+mypy==2.3.1
+ruff==0.16.5
+pandas-stubs==3.0.5.260730

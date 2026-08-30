@@ -1,0 +1,59 @@
+# Configuracion de herramientas, no de empaquetado.
+#
+# El paquete no se instala ni se publica: el entorno se reproduce con `venv` mas
+# `requirements.txt`, que es lo que un evaluador necesita para correr los tests en una
+# maquina limpia sin instalar antes un gestor de dependencias. Este archivo existe solo
+# para que las tres herramientas de calidad se configuren en un lugar y no en tres
+# dotfiles sueltos en la raiz.
+
+[tool.pytest.ini_options]
+testpaths = ["modulo_a/aurum_pipeline/tests"]
+pythonpath = ["modulo_a"]
+addopts = [
+    "--cov=aurum_pipeline",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+    "-q",
+]
+markers = [
+    "integracion: prueba que necesita el extracto real; se salta si no esta disponible",
+]
+
+[tool.coverage.run]
+omit = ["*/tests/*"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["modulo_a/aurum_pipeline"]
+mypy_path = "modulo_a"
+strict = true
+warn_unreachable = true
+# El notebook y los tests tambien se verifican; pandas no siempre tipa sus retornos, y
+# ahi la anotacion explicita del codigo propio es la que manda.
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = ["pandas.*", "numpy.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "ANN", "D"]
+ignore = [
+    "D203",   # incompatible con D211, que es la que se usa
+    "D213",   # incompatible con D212, que es la que se usa
+    "ANN401", # `Any` explicito se permite donde pandas no ofrece un tipo mejor
+    "N803",   # `X` en mayuscula: es la convencion de fit(X, y) que sigue el enunciado
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["D100", "D103", "D104", "ANN201"]
+# El notebook es exploratorio y sus celdas se leen en pantalla completa; el resto de las
+# reglas si aplica, para que no se cuele codigo muerto ni importaciones sin usar.
+"*.ipynb" = ["E501"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
